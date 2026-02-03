@@ -1,0 +1,58 @@
+services:
+  emoji-bot:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - MISSKEY_HOST=${MISSKEY_HOST}
+      - MISSKEY_TOKEN=${MISSKEY_TOKEN}
+      - RENDERER_BASE_URL=http://renderer:8109
+      - VALKEY_HOST=valkey
+      - VALKEY_PORT=6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5-mini-2025-08-07}
+      - PORT=3000
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      valkey:
+        condition: service_healthy
+      renderer:
+        condition: service_healthy
+    networks:
+      - emoji-bot-network
+
+  renderer:
+    image: ghcr.io/soli0222/emoji-renderer:1.1.0
+    restart: unless-stopped
+    ports:
+      - "8109:8109"
+      - "9109:9109"
+    healthcheck:
+      test: ["CMD", "curl", "http://renderer:8109/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - emoji-bot-network
+
+  valkey:
+    image: valkey/valkey:9.0.1-alpine3.23
+    restart: unless-stopped
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - emoji-bot-network
+
+volumes:
+  valkey-data:
+
+networks:
+  emoji-bot-network:
+    driver: bridge
