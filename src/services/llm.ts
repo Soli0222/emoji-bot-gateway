@@ -14,7 +14,7 @@ export const EmojiParamsSchema = z.object({
   text: z.string().describe('The text to render on the emoji (max 20 chars, use \\n for newlines)'),
   layout: z
     .object({
-      mode: z.enum(['square', 'banner']).nullable().describe('square: 256x256 fixed, banner: height 256, width variable'),
+      mode: z.enum(['square', 'banner']).nullable().describe('square: 256x256 fixed, banner: height and width variable'),
       alignment: z.enum(['left', 'center', 'right']).nullable().describe('Text alignment'),
     })
     .nullable(),
