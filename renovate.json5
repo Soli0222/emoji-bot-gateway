@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard"
+  ],
+  timezone: 'Asia/Tokyo',
+  rangeStrategy: 'bump',
+  prConcurrentLimit: 20,
+  prHourlyLimit: 10,
+  "reviewers": [
+    "Soli0222"
+  ],
+  semanticCommits: 'enabled',
+  prCreation: 'immediate',
+  rebaseWhen: 'auto',
+  dependencyDashboard: true,
+  vulnerabilityAlerts: {
+    enabled: true,
+    labels: [
+      'security',
+    ],
+  },
+  packageRules: [
+    {
+      matchManagers: [
+        'github-actions',
+      ],
+      commitMessageTopic: 'GitHub Action {{depName}}',
+      automerge: true,
+    },
+    {
+      matchManagers: [
+        'docker-compose',
+        'dockerfile',
+      ],
+      commitMessageTopic: 'Docker {{depName}}',
+      automerge: false,
+    },
+    {
+      matchManagers: [
+        'npm',
+      ],
+      commitMessageTopic: 'Node {{depName}}',
+      automerge: false,
+    },
+  ],
+}
