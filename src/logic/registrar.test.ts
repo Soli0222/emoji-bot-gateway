@@ -84,8 +84,6 @@ describe('analyzeUserResponse', () => {
       'やめて',
       'キャンセル',
       'cancel',
-      '作り直して',
-      'やり直して',
       '違う',
       'ちがう',
       '却下',
@@ -189,7 +187,7 @@ describe('handleConfirmation', () => {
 
       expect(mockDeleteState).toHaveBeenCalledWith('user123');
       expect(mockCreateNote).toHaveBeenCalledWith({
-        text: expect.stringContaining('作り直しますね'),
+        text: expect.stringContaining('キャンセルしますね'),
         replyId: 'replyNote123',
       });
     });

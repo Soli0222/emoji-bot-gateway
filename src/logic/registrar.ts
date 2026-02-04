@@ -110,7 +110,7 @@ async function handleNo(
 
   // Send acknowledgment
   await createNote({
-    text: '承知しました。作り直しますね。新しいリクエストをお待ちしています！',
+    text: '承知しました。キャンセルしますね。新しいリクエストをお待ちしています！',
     replyId: replyToNoteId,
   });
 
