@@ -23,7 +23,7 @@ services:
       - emoji-bot-network
 
   renderer:
-    image: ghcr.io/soli0222/emoji-renderer:1.1.0
+    image: ghcr.io/soli0222/emoji-renderer:1.1.1
     restart: unless-stopped
     ports:
       - "8109:8109"
