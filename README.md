@@ -7,7 +7,7 @@ AIによる画像生成・ユーザー確認・絵文字登録までを自動化
 
 - ローカルユーザーからのメンションのみを受け付け
 - GPT-5-miniを使用した絵文字パラメータの自動生成
-- Service A (Renderer) を使用した画像生成
+- [Emoji Renderer](https://github.com/Soli0222/emoji-renderer) を使用した画像生成
 - Valkey (Redis互換) による対話ステート管理
 - Fibonacci Backoffによる自動再接続
 
@@ -15,7 +15,7 @@ AIによる画像生成・ユーザー確認・絵文字登録までを自動化
 
 - Node.js 20+
 - Valkey 7.2+ (または Redis 7+)
-- Service A (レンダリングサービス) が稼働していること
+- [Emoji Renderer](https://github.com/Soli0222/emoji-renderer) が稼働していること
 - Misskey管理者権限を持つBotアカウント
 
 ## セットアップ
@@ -62,7 +62,7 @@ docker compose up -d
 |--------|------|-----------|
 | `MISSKEY_HOST` | Misskeyインスタンスのホスト名 | (必須) |
 | `MISSKEY_TOKEN` | 管理者権限を持つAPIトークン | (必須) |
-| `RENDERER_BASE_URL` | Service AのURL | (必須) |
+| `RENDERER_BASE_URL` | [Emoji Renderer](https://github.com/Soli0222/emoji-renderer)のURL | (必須) |
 | `VALKEY_HOST` | Valkeyホスト | `localhost` |
 | `VALKEY_PORT` | Valkeyポート | `6379` |
 | `VALKEY_PASSWORD` | Valkeyパスワード | (なし) |
