@@ -29,6 +29,13 @@ async function handleMention(note: Note): Promise<void> {
     return;
   }
 
+  // Deduplication: Skip if we've already processed this note
+  const isNew = await valkey.markNoteProcessed(note.id);
+  if (!isNew) {
+    logger.debug({ noteId: note.id }, 'Duplicate note detected, skipping');
+    return;
+  }
+
   const userId = note.userId;
 
   // Rate limit check
@@ -65,16 +72,41 @@ async function handleMention(note: Note): Promise<void> {
   }
 }
 
+// Active stream instance for lifecycle management
+let currentStream: ReturnType<typeof getStreamingClient> | null = null;
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
 /**
  * Start the streaming connection
  */
 export async function startStreaming(): Promise<void> {
   let reconnectAttempt = 0;
 
+  const cleanup = () => {
+    // Cancel any pending reconnect
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+    // Disconnect existing stream
+    if (currentStream) {
+      try {
+        currentStream.close();
+      } catch (e) {
+        logger.debug({ err: e }, 'Error closing previous stream');
+      }
+      currentStream = null;
+    }
+  };
+
   const connect = () => {
+    // Clean up any existing connection before creating a new one
+    cleanup();
+
     logger.info('Connecting to Misskey Streaming API...');
 
     const stream = getStreamingClient();
+    currentStream = stream;
     const main = stream.useChannel('main');
 
     stream.on('_connected_', () => {
@@ -97,7 +129,7 @@ export async function startStreaming(): Promise<void> {
       reconnectAttempt++;
       const delay = fibonacciBackoff(reconnectAttempt);
       logger.info({ attempt: reconnectAttempt, delay }, 'Scheduling reconnect');
-      setTimeout(connect, delay);
+      reconnectTimer = setTimeout(connect, delay);
     };
   };
 

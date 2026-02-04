@@ -97,6 +97,17 @@ class ValkeyService {
     return true;
   }
 
+  /**
+   * Check if a note has already been processed (deduplication)
+   * Returns true if this is the first time seeing this note, false if duplicate
+   */
+  async markNoteProcessed(noteId: string): Promise<boolean> {
+    const key = `${KEY_PREFIX}processed:${noteId}`;
+    // SET with NX returns 'OK' only if the key didn't exist
+    const result = await this.client.set(key, '1', 'EX', 300, 'NX');
+    return result === 'OK';
+  }
+
   async close(): Promise<void> {
     await this.client.quit();
   }
