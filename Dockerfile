@@ -1,5 +1,5 @@
 # Build stage
-FROM node:25.6.0-alpine3.23 AS builder
+FROM node:25.6.1-alpine3.23 AS builder
 
 # Install pnpm
 RUN npm install -g pnpm@10
@@ -20,7 +20,7 @@ COPY src ./src
 RUN pnpm run build
 
 # Production stage
-FROM node:25.6.0-alpine3.23 AS runner
+FROM node:25.6.1-alpine3.23 AS runner
 
 # Install pnpm
 RUN npm install -g pnpm@10
