@@ -21,6 +21,17 @@
       'security',
     ],
   },
+  customManagers: [
+    {
+      customType: 'regex',
+      fileMatch: ['^\.github/workflows/.*\.yml$'],
+      matchStrings: [
+        "node-version:\\s*['\"]?(?<currentValue>[^'\"\\s]+)['\"]?",
+      ],
+      depNameTemplate: 'node',
+      datasourceTemplate: 'docker',
+    },
+  ],
   packageRules: [
     {
       matchManagers: [
@@ -34,15 +45,22 @@
         'docker-compose',
         'dockerfile',
       ],
+      matchDepNames: ['!node'],
       commitMessageTopic: 'Docker {{depName}}',
-      automerge: false,
+      automerge: true,
+    },
+    {
+      matchDepNames: ['node'],
+      groupName: 'node',
+      commitMessageTopic: 'Node.js',
+      automerge: true,
     },
     {
       matchManagers: [
         'npm',
       ],
       commitMessageTopic: 'Node {{depName}}',
-      automerge: false,
+      automerge: true,
     },
   ],
 }
