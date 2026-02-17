@@ -3,7 +3,7 @@ import { getStreamingClient } from './services/misskey.js';
 import { valkey } from './services/valkey.js';
 import { shouldProcessMention, extractMessageContent } from './logic/filter.js';
 import { generateAndPropose } from './logic/generator.js';
-import { handleConfirmation } from './logic/registrar.js';
+import { handleConfirmation, analyzeUserResponse } from './logic/registrar.js';
 import { logger } from './logger.js';
 
 // Bot username - will be set during initialization
@@ -63,6 +63,14 @@ async function handleMention(note: Note): Promise<void> {
       logger.debug({ userId, state }, 'Existing state found, handling confirmation');
       await handleConfirmation(userId, message, note.id, state);
     } else {
+      // Guard: If the message looks like a confirmation response (yes/no)
+      // but there's no active state, ignore it instead of generating an emoji
+      const intent = analyzeUserResponse(message);
+      if (intent !== 'unknown') {
+        logger.debug({ userId, message, intent }, 'Confirmation response without active state, ignoring');
+        return;
+      }
+
       // Phase 2: New generation request
       logger.debug({ userId }, 'No state found, starting generation');
       await generateAndPropose(userId, message, note.id);
