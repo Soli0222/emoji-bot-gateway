@@ -120,6 +120,11 @@ export async function startStreaming(): Promise<void> {
     stream.on('_connected_', () => {
       logger.info('Connected to Misskey Streaming API');
       reconnectAttempt = 0;
+      // Cancel any pending reconnect scheduled before connection was established
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
     });
 
     stream.on('_disconnected_', () => {
