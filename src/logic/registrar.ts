@@ -116,13 +116,31 @@ async function handleNo(
 
   logger.info({ userId }, 'User rejected proposal, cleared state');
 
-  // If the message contains new instructions, trigger regeneration
-  const hasNewRequest = userMessage.length > 10 && !/^(いいえ|no|ダメ|だめ|やめ|キャンセル)$/i.test(userMessage.trim());
+  // Strip the rejection keyword and separators to extract new request if any
+  const newRequest = extractNewRequest(userMessage);
 
-  if (hasNewRequest) {
-    // Re-enter Phase 2 with the new request
-    await generateAndPropose(userId, userMessage, replyToNoteId);
+  if (newRequest) {
+    // Re-enter Phase 2 with only the new request (rejection prefix stripped)
+    await generateAndPropose(userId, newRequest, replyToNoteId);
   }
+}
+
+/**
+ * Extract new request from a rejection message by stripping the rejection keyword and separators.
+ * Returns the remaining text if it contains a meaningful new request, or null otherwise.
+ */
+export function extractNewRequest(message: string): string | null {
+  const stripped = message
+    .replace(/^(いいえ|no|ダメ|だめ|やめて?|キャンセル|cancel|作り直し?て?|やり直し?て?|違う|ちがう|却下)/i, '')
+    .replace(/^[、,，。.\s]+/, '') // Remove leading punctuation/separators
+    .trim();
+
+  // Only treat as a new request if there's meaningful content remaining
+  if (stripped.length === 0) {
+    return null;
+  }
+
+  return stripped;
 }
 
 async function handleUnknown(replyToNoteId: string): Promise<void> {

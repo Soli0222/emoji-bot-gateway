@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { analyzeUserResponse, handleConfirmation } from '../logic/registrar.js';
+import { analyzeUserResponse, handleConfirmation, extractNewRequest } from '../logic/registrar.js';
 import type { ConversationState } from '../services/valkey.js';
 
 // Use vi.hoisted to ensure mocks are available before vi.mock hoisting
@@ -134,6 +134,33 @@ describe('analyzeUserResponse', () => {
   });
 });
 
+describe('extractNewRequest', () => {
+  it('should return null for simple rejection words', () => {
+    expect(extractNewRequest('いいえ')).toBeNull();
+    expect(extractNewRequest('no')).toBeNull();
+    expect(extractNewRequest('ダメ')).toBeNull();
+    expect(extractNewRequest('だめ')).toBeNull();
+    expect(extractNewRequest('やめて')).toBeNull();
+    expect(extractNewRequest('キャンセル')).toBeNull();
+    expect(extractNewRequest('cancel')).toBeNull();
+    expect(extractNewRequest('却下')).toBeNull();
+    expect(extractNewRequest('違う')).toBeNull();
+    expect(extractNewRequest('ちがう')).toBeNull();
+  });
+
+  it('should extract new request after rejection keyword and separator', () => {
+    expect(extractNewRequest('いいえ、もっと可愛い絵文字にして')).toBe('もっと可愛い絵文字にして');
+    expect(extractNewRequest('ダメ、赤色にして')).toBe('赤色にして');
+    expect(extractNewRequest('違う もっと派手にして')).toBe('もっと派手にして');
+    expect(extractNewRequest('no, make it bigger')).toBe('make it bigger');
+  });
+
+  it('should return null for rejection with only punctuation/separators', () => {
+    expect(extractNewRequest('いいえ、')).toBeNull();
+    expect(extractNewRequest('no...')).toBeNull();
+  });
+});
+
 describe('handleConfirmation', () => {
   const mockState: ConversationState = {
     status: 'confirming',
@@ -192,7 +219,7 @@ describe('handleConfirmation', () => {
       });
     });
 
-    it('should trigger regeneration if message contains new request', async () => {
+    it('should trigger regeneration if message contains new request, with rejection prefix stripped', async () => {
       mockCreateNote.mockResolvedValue({ createdNote: { id: 'newNote123' } });
       mockGenerateAndPropose.mockResolvedValue({ success: true });
 
@@ -201,7 +228,7 @@ describe('handleConfirmation', () => {
       expect(mockDeleteState).toHaveBeenCalledWith('user123');
       expect(mockGenerateAndPropose).toHaveBeenCalledWith(
         'user123',
-        'いいえ、もっと可愛い絵文字にして',
+        'もっと可愛い絵文字にして',
         'replyNote123'
       );
     });
