@@ -69,7 +69,7 @@ Guidelines:
     text: {
       format: zodTextFormat(EmojiParamsSchema, 'emoji_params'),
     },
-    max_output_tokens: 2000,
+    max_output_tokens: 4000,
   });
 
   // Handle refusal
