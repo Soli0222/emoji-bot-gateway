@@ -21,8 +21,8 @@ importers:
         specifier: 2026.1.0-beta.0
         version: 2026.1.0-beta.0
       openai:
-        specifier: ^6.22.0
-        version: 6.22.0(zod@4.3.6)
+        specifier: ^6.24.0
+        version: 6.24.0(zod@4.3.6)
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -885,8 +885,8 @@ packages:
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
-  openai@6.22.0:
-    resolution: {integrity: sha512-7Yvy17F33Bi9RutWbsaYt5hJEEJ/krRPOrwan+f9aCPuMat1WVsb2VNSII5W1EksKT6fF69TG/xj4XzodK3JZw==}
+  openai@6.24.0:
+    resolution: {integrity: sha512-WLR+qki3S4c9ZHilR42GDTxEpTrMFeWfcFNg1RMELW0ZCCBJMDDlqVV+QQEM5KN2hjUyZu45QpgJmln/0ykFRg==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
@@ -1900,7 +1900,7 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
-  openai@6.22.0(zod@4.3.6):
+  openai@6.24.0(zod@4.3.6):
     optionalDependencies:
       zod: 4.3.6
 
