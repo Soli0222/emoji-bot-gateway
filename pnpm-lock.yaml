@@ -10,10 +10,10 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.19.11
-        version: 1.19.11(hono@4.12.5)
+        version: 1.19.11(hono@4.12.6)
       hono:
-        specifier: ^4.12.5
-        version: 4.12.5
+        specifier: ^4.12.6
+        version: 4.12.6
       ioredis:
         specifier: ^5.10.0
         version: 5.10.0
@@ -765,8 +765,8 @@ packages:
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
-  hono@4.12.5:
-    resolution: {integrity: sha512-3qq+FUBtlTHhtYxbxheZgY8NIFnkkC/MR8u5TTsr7YZ3wixryQ3cCwn3iZbg8p8B88iDBBAYSfZDS75t8MN7Vg==}
+  hono@4.12.6:
+    resolution: {integrity: sha512-KljEp+MeEEEIOT75qBo1UjqqB29fRMtlDEwCxcexOzdkUq6LR/vRvHk5pdROcxyOYyW1niq7Gb5pFVGy5R1eBw==}
     engines: {node: '>=16.9.0'}
 
   html-escaper@2.0.2:
@@ -1315,9 +1315,9 @@ snapshots:
       '@eslint/core': 1.1.1
       levn: 0.4.1
 
-  '@hono/node-server@1.19.11(hono@4.12.5)':
+  '@hono/node-server@1.19.11(hono@4.12.6)':
     dependencies:
-      hono: 4.12.5
+      hono: 4.12.6
 
   '@humanfs/core@0.19.1': {}
 
@@ -1788,7 +1788,7 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono@4.12.5: {}
+  hono@4.12.6: {}
 
   html-escaper@2.0.2: {}
 
