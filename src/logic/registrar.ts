@@ -211,21 +211,19 @@ async function handleRetake(
       restorePreviousConfirming = false;
     }
   } finally {
-    if (!restorePreviousConfirming) {
-      return;
-    }
-
-    try {
-      await valkey.setState(userId, {
-        ...state,
-        status: 'confirming',
-      });
-    } catch (rollbackError) {
-      logger.error(
-        { err: rollbackError, userId },
-        'Failed to restore confirming state after retake; deleting conversation state'
-      );
-      await valkey.deleteState(userId);
+    if (restorePreviousConfirming) {
+      try {
+        await valkey.setState(userId, {
+          ...state,
+          status: 'confirming',
+        });
+      } catch (rollbackError) {
+        logger.error(
+          { err: rollbackError, userId },
+          'Failed to restore confirming state after retake; deleting conversation state'
+        );
+        await valkey.deleteState(userId);
+      }
     }
   }
 }
