@@ -5,23 +5,25 @@ import { config } from './config.js';
 import { valkey } from './services/valkey.js';
 import { misskeyClient } from './services/misskey.js';
 import { fetchFontList } from './services/renderer.js';
-import { startStreaming, setBotUsername } from './streaming.js';
+import { startStreaming, setBotUsername, isStreamingConnected } from './streaming.js';
 
 const app = new Hono();
 
 // Health check endpoint
 app.get('/health', async (c) => {
   const valkeyOk = await valkey.ping();
+  const streamingOk = isStreamingConnected();
 
   const status = {
-    status: valkeyOk ? 'healthy' : 'degraded',
+    status: valkeyOk && streamingOk ? 'healthy' : 'unhealthy',
     timestamp: new Date().toISOString(),
     checks: {
       valkey: valkeyOk ? 'ok' : 'error',
+      streaming: streamingOk ? 'ok' : 'error',
     },
   };
 
-  return c.json(status, valkeyOk ? 200 : 503);
+  return c.json(status, valkeyOk && streamingOk ? 200 : 503);
 });
 
 // Metrics endpoint (basic)

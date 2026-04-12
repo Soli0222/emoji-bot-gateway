@@ -8,17 +8,11 @@ import { logger } from './logger.js';
 
 // Bot username - will be set during initialization
 let botUsername = '';
+let streamingConnected = false;
+let streamGeneration = 0;
 
-/**
- * Fibonacci backoff for reconnection
- */
-function fibonacciBackoff(attempt: number): number {
-  const fib = [1, 1];
-  for (let i = 2; i <= attempt; i++) {
-    fib[i] = fib[i - 1] + fib[i - 2];
-  }
-  return Math.min(fib[attempt] * 1000, 60000); // Max 60 seconds
-}
+const INITIAL_CONNECTION_TIMEOUT = 30_000;
+const DISCONNECT_FATAL_TIMEOUT = 120_000;
 
 /**
  * Handle incoming mention event
@@ -80,73 +74,63 @@ async function handleMention(note: Note): Promise<void> {
   }
 }
 
-// Active stream instance for lifecycle management
-let currentStream: ReturnType<typeof getStreamingClient> | null = null;
-let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+export function isStreamingConnected(): boolean {
+  return streamingConnected;
+}
 
 /**
  * Start the streaming connection
  */
 export async function startStreaming(): Promise<void> {
-  let reconnectAttempt = 0;
+  logger.info('Connecting to Misskey Streaming API...');
 
-  const cleanup = () => {
-    // Cancel any pending reconnect
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
+  const myGeneration = ++streamGeneration;
+  const stream = getStreamingClient();
+  const main = stream.useChannel('main');
+  let disconnectWatchdog: ReturnType<typeof setTimeout> | null = null;
+
+  const initialTimeout = setTimeout(() => {
+    if (!streamingConnected) {
+      logger.fatal({ generation: myGeneration, currentGeneration: streamGeneration }, 'Initial streaming connection failed within 30s, exiting');
+      process.exit(1);
     }
-    // Disconnect existing stream
-    if (currentStream) {
-      try {
-        currentStream.close();
-      } catch (e) {
-        logger.debug({ err: e }, 'Error closing previous stream');
-      }
-      currentStream = null;
+  }, INITIAL_CONNECTION_TIMEOUT);
+
+  stream.on('_connected_', () => {
+    streamingConnected = true;
+    clearTimeout(initialTimeout);
+    if (disconnectWatchdog) {
+      clearTimeout(disconnectWatchdog);
+      disconnectWatchdog = null;
     }
-  };
+    logger.info(
+      { generation: myGeneration, currentGeneration: streamGeneration },
+      'Connected to Misskey Streaming API'
+    );
+  });
 
-  const connect = () => {
-    // Clean up any existing connection before creating a new one
-    cleanup();
+  stream.on('_disconnected_', () => {
+    streamingConnected = false;
+    if (!disconnectWatchdog) {
+      disconnectWatchdog = setTimeout(() => {
+        logger.fatal(
+          { generation: myGeneration, currentGeneration: streamGeneration },
+          'Streaming not recovered within 2 minutes, exiting'
+        );
+        process.exit(1);
+      }, DISCONNECT_FATAL_TIMEOUT);
+    }
+    logger.warn(
+      { generation: myGeneration, currentGeneration: streamGeneration },
+      'Disconnected from Misskey Streaming API, RWS will auto-reconnect'
+    );
+  });
 
-    logger.info('Connecting to Misskey Streaming API...');
-
-    const stream = getStreamingClient();
-    currentStream = stream;
-    const main = stream.useChannel('main');
-
-    stream.on('_connected_', () => {
-      logger.info('Connected to Misskey Streaming API');
-      reconnectAttempt = 0;
-      // Cancel any pending reconnect scheduled before connection was established
-      if (reconnectTimer) {
-        clearTimeout(reconnectTimer);
-        reconnectTimer = null;
-      }
+  main.on('mention', (note: Note) => {
+    handleMention(note).catch((error) => {
+      logger.error({ err: error }, 'Unhandled error in mention handler');
     });
-
-    stream.on('_disconnected_', () => {
-      logger.warn('Disconnected from Misskey Streaming API');
-      scheduleReconnect();
-    });
-
-    main.on('mention', (note: Note) => {
-      handleMention(note).catch((error) => {
-        logger.error({ err: error }, 'Unhandled error in mention handler');
-      });
-    });
-
-    const scheduleReconnect = () => {
-      reconnectAttempt++;
-      const delay = fibonacciBackoff(reconnectAttempt);
-      logger.info({ attempt: reconnectAttempt, delay }, 'Scheduling reconnect');
-      reconnectTimer = setTimeout(connect, delay);
-    };
-  };
-
-  connect();
+  });
 }
 
 export function setBotUsername(username: string): void {
