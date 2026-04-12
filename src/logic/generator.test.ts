@@ -52,11 +52,13 @@ vi.mock('../services/renderer.js', () => ({
 const mockMisskey = {
   uploadFile: vi.fn(),
   createNote: vi.fn(),
+  isShortcodeTaken: vi.fn(),
 };
 
 vi.mock('../services/misskey.js', () => ({
   uploadFile: mockMisskey.uploadFile,
   createNote: mockMisskey.createNote,
+  isShortcodeTaken: mockMisskey.isShortcodeTaken,
 }));
 
 describe('Generator Logic', () => {
@@ -80,6 +82,7 @@ describe('Generator Logic', () => {
         explanation: 'テスト絵文字',
       });
       mockRenderer.renderEmoji.mockResolvedValue(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+      mockMisskey.isShortcodeTaken.mockResolvedValue(false);
       mockMisskey.uploadFile.mockResolvedValue({ id: 'file123', url: 'https://example.com/file.png' });
       mockMisskey.createNote.mockResolvedValue({ createdNote: { id: 'note456' } });
 
@@ -96,12 +99,94 @@ describe('Generator Logic', () => {
       expect(mockLlm.generateEmojiParams).toHaveBeenCalledWith('絵文字作って', ['notosansjp_black', 'mplus1_black']);
       expect(mockRenderer.renderEmoji).toHaveBeenCalled();
       expect(mockMisskey.uploadFile).toHaveBeenCalled();
+      expect(mockMisskey.isShortcodeTaken).toHaveBeenCalledWith('test_emoji');
       expect(mockValkey.setState).toHaveBeenCalledWith('user123', expect.objectContaining({
         status: 'confirming',
         fileId: 'file123',
         shortcode: 'test_emoji',
       }));
       expect(mockMisskey.createNote).toHaveBeenCalled();
+    });
+
+    it('should retry with suffixed shortcode when the original is taken', async () => {
+      mockRenderer.fetchFontList.mockResolvedValue(['notosansjp_black']);
+      mockLlm.generateEmojiParams.mockResolvedValue({
+        params: {
+          text: 'テスト',
+          style: {
+            fontId: 'notosansjp_black',
+            textColor: '#ffffff',
+          },
+          shortcode: 'test_emoji',
+        } as EmojiParams,
+        explanation: 'テスト絵文字',
+      });
+      mockRenderer.renderEmoji.mockResolvedValue(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+      mockMisskey.isShortcodeTaken
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      mockMisskey.uploadFile.mockResolvedValue({ id: 'file123', url: 'https://example.com/file.png' });
+      mockMisskey.createNote.mockResolvedValue({ createdNote: { id: 'note456' } });
+
+      const { generateAndPropose } = await import('../logic/generator.js');
+
+      const result = await generateAndPropose('user123', '絵文字作って', 'replyNote123');
+
+      expect(result.success).toBe(true);
+      expect(result.shortcode).toBe('test_emoji_2');
+      expect(mockMisskey.isShortcodeTaken).toHaveBeenNthCalledWith(1, 'test_emoji');
+      expect(mockMisskey.isShortcodeTaken).toHaveBeenNthCalledWith(2, 'test_emoji_2');
+      expect(mockRenderer.renderEmoji).toHaveBeenCalledWith(
+        expect.objectContaining({ shortcode: 'test_emoji_2' })
+      );
+      expect(mockMisskey.uploadFile).toHaveBeenCalledWith(expect.any(Buffer), 'test_emoji_2');
+      expect(mockValkey.setState).toHaveBeenCalledWith(
+        'user123',
+        expect.objectContaining({ shortcode: 'test_emoji_2' })
+      );
+      expect(mockMisskey.createNote).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(':test_emoji_2:'),
+        })
+      );
+    });
+
+    it('should fall back to a random suffix after numbered retries are exhausted', async () => {
+      mockRenderer.fetchFontList.mockResolvedValue(['notosansjp_black']);
+      mockLlm.generateEmojiParams.mockResolvedValue({
+        params: {
+          text: 'テスト',
+          style: {
+            fontId: 'notosansjp_black',
+            textColor: '#ffffff',
+          },
+          shortcode: 'test_emoji',
+        } as EmojiParams,
+        explanation: 'テスト絵文字',
+      });
+      mockRenderer.renderEmoji.mockResolvedValue(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+      mockMisskey.isShortcodeTaken
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      mockMisskey.uploadFile.mockResolvedValue({ id: 'file123', url: 'https://example.com/file.png' });
+      mockMisskey.createNote.mockResolvedValue({ createdNote: { id: 'note456' } });
+      const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      const { generateAndPropose } = await import('../logic/generator.js');
+
+      const result = await generateAndPropose('user123', '絵文字作って', 'replyNote123');
+
+      expect(result.success).toBe(true);
+      expect(result.shortcode).toBe('test_emoji_0000');
+      expect(mockMisskey.isShortcodeTaken).toHaveBeenLastCalledWith('test_emoji_0000');
+      expect(mockMisskey.uploadFile).toHaveBeenCalledWith(expect.any(Buffer), 'test_emoji_0000');
+
+      randomSpy.mockRestore();
     });
 
     it('should handle errors gracefully', async () => {

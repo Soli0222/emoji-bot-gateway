@@ -78,6 +78,14 @@ export async function addEmoji(params: {
   logger.info({ name: params.name }, 'Emoji registered');
 }
 
+export async function isShortcodeTaken(shortcode: string): Promise<boolean> {
+  const emojis = await client.request('admin/emoji/list', {
+    query: shortcode,
+  });
+
+  return emojis.some((emoji) => emoji.name === shortcode);
+}
+
 export function getStreamingClient() {
   return new Misskey.Stream(`https://${config.MISSKEY_HOST}`, {
     token: config.MISSKEY_TOKEN,
