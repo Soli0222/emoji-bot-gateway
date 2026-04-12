@@ -8,6 +8,19 @@ export type UserIntent = 'yes' | 'cancel' | 'retake' | 'unknown';
 
 const STALE_CONFIRMATION_MESSAGE =
   'この確認はすでに処理済みです。最新の案内を確認してください。';
+const RETAKE_KEYWORD_PATTERN =
+  /(やり直|作り直|リテイク|再生成|修正|調整|変更|直して|なおして|見切れ|途切れ|欠け)/i;
+const RETAKE_ATTRIBUTE_PATTERN =
+  /(色|カラー|フォント|文字|テキスト|サイズ|大きさ|位置|余白|下部|上部|左|右|中央|背景|縁|輪郭|影|丸|かわい|明る|濃|薄|太|細)/i;
+const RETAKE_REQUEST_PATTERN = /(にして|して|してください|お願いします|お願い)$/i;
+
+function isLikelyRetakeRequest(text: string): boolean {
+  if (RETAKE_KEYWORD_PATTERN.test(text)) {
+    return true;
+  }
+
+  return RETAKE_ATTRIBUTE_PATTERN.test(text) && RETAKE_REQUEST_PATTERN.test(text);
+}
 
 /**
  * Analyze user's response to determine intent
@@ -35,6 +48,10 @@ export function analyzeUserResponse(text: string): UserIntent {
     if (pattern.test(normalizedText)) {
       return 'cancel';
     }
+  }
+
+  if (normalizedText.length > 0 && isLikelyRetakeRequest(normalizedText)) {
+    return 'retake';
   }
 
   return 'unknown';
