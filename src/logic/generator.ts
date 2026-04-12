@@ -1,6 +1,6 @@
 import { generateEmojiParams, type EmojiParams } from '../services/llm.js';
 import { fetchFontList, renderEmoji } from '../services/renderer.js';
-import { uploadFile, createNote } from '../services/misskey.js';
+import { uploadFile, createNote, isShortcodeTaken } from '../services/misskey.js';
 import { valkey, type ConversationState } from '../services/valkey.js';
 import { logger } from '../logger.js';
 
@@ -10,6 +10,10 @@ export interface GenerationResult {
   shortcode?: string;
   error?: string;
 }
+
+const SHORTCODE_SUFFIX_RETRY_LIMIT = 5;
+const RANDOM_SUFFIX_RETRY_LIMIT = 5;
+const RANDOM_SUFFIX_LENGTH = 4;
 
 /**
  * Phase 2: Generate emoji and send proposal to user
@@ -27,18 +31,23 @@ export async function generateAndPropose(
     logger.info({ userId, message: userMessage }, 'Generating emoji params');
     const { params } = await generateEmojiParams(userMessage, fontList);
 
+    // Step 2.5: Resolve shortcode collisions before rendering and upload
+    const shortcode = await resolveAvailableShortcode(params.shortcode);
+    const resolvedParams =
+      shortcode === params.shortcode ? params : { ...params, shortcode };
+
     // Step 3: Render the emoji
-    logger.info({ params }, 'Rendering emoji');
-    const imageBuffer = await renderEmoji(params);
+    logger.info({ params: resolvedParams }, 'Rendering emoji');
+    const imageBuffer = await renderEmoji(resolvedParams);
 
     // Step 4: Upload to Misskey Drive
-    const uploadResult = await uploadFile(imageBuffer, params.shortcode);
+    const uploadResult = await uploadFile(imageBuffer, resolvedParams.shortcode);
 
     // Step 5: Save state to Valkey
     const state: ConversationState = {
       status: 'confirming',
       fileId: uploadResult.id,
-      shortcode: params.shortcode,
+      shortcode: resolvedParams.shortcode,
       replyToId: replyToNoteId,
       originalText: userMessage,
     };
@@ -46,17 +55,17 @@ export async function generateAndPropose(
 
     // Step 6: Send proposal reply
     await createNote({
-      text: buildProposalMessage(params),
+      text: buildProposalMessage(resolvedParams),
       replyId: replyToNoteId,
       fileIds: [uploadResult.id],
     });
 
-    logger.info({ userId, shortcode: params.shortcode }, 'Proposal sent');
+    logger.info({ userId, shortcode: resolvedParams.shortcode }, 'Proposal sent');
 
     return {
       success: true,
       fileId: uploadResult.id,
-      shortcode: params.shortcode,
+      shortcode: resolvedParams.shortcode,
     };
   } catch (error) {
     logger.error({ err: error, userId }, 'Generation failed');
@@ -72,6 +81,37 @@ export async function generateAndPropose(
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
+}
+
+async function resolveAvailableShortcode(baseShortcode: string): Promise<string> {
+  if (!(await isShortcodeTaken(baseShortcode))) {
+    return baseShortcode;
+  }
+
+  for (let suffix = 2; suffix <= SHORTCODE_SUFFIX_RETRY_LIMIT + 1; suffix += 1) {
+    const candidate = `${baseShortcode}_${suffix}`;
+    if (!(await isShortcodeTaken(candidate))) {
+      logger.info({ original: baseShortcode, resolved: candidate }, 'Resolved duplicate shortcode');
+      return candidate;
+    }
+  }
+
+  for (let attempt = 0; attempt < RANDOM_SUFFIX_RETRY_LIMIT; attempt += 1) {
+    const candidate = `${baseShortcode}_${generateRandomSuffix(RANDOM_SUFFIX_LENGTH)}`;
+    if (!(await isShortcodeTaken(candidate))) {
+      logger.info({ original: baseShortcode, resolved: candidate }, 'Resolved duplicate shortcode');
+      return candidate;
+    }
+  }
+
+  throw new Error(`Failed to find available shortcode for ${baseShortcode}`);
+}
+
+function generateRandomSuffix(length: number): string {
+  const max = 36 ** length;
+  return Math.floor(Math.random() * max)
+    .toString(36)
+    .padStart(length, '0');
 }
 
 function buildProposalMessage(params: EmojiParams): string {

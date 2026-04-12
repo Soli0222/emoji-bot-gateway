@@ -167,6 +167,35 @@ describe('Misskey Service', () => {
     });
   });
 
+  describe('isShortcodeTaken', () => {
+    it('should return true when exact shortcode exists', async () => {
+      mockRequest.mockResolvedValue([
+        { name: 'test_emoji' },
+        { name: 'test_emoji_2' },
+      ]);
+
+      vi.resetModules();
+      const { isShortcodeTaken } = await import('../services/misskey.js');
+
+      await expect(isShortcodeTaken('test_emoji')).resolves.toBe(true);
+      expect(mockRequest).toHaveBeenCalledWith('admin/emoji/list', {
+        query: 'test_emoji',
+      });
+    });
+
+    it('should return false when only partial matches exist', async () => {
+      mockRequest.mockResolvedValue([
+        { name: 'test_emoji_2' },
+        { name: 'another_test_emoji' },
+      ]);
+
+      vi.resetModules();
+      const { isShortcodeTaken } = await import('../services/misskey.js');
+
+      await expect(isShortcodeTaken('test_emoji')).resolves.toBe(false);
+    });
+  });
+
   describe('getStreamingClient', () => {
     it('should return a Stream instance', async () => {
       vi.resetModules();
