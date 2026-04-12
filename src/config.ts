@@ -15,7 +15,7 @@ const envSchema = z.object({
 
   // OpenAI Configuration
   OPENAI_API_KEY: z.string().describe('OpenAI API key'),
-  OPENAI_MODEL: z.string().default('gpt-5-mini-2025-08-07'),
+  OPENAI_MODEL: z.string().default('gpt-5.4-mini-2026-03-17'),
 
   // Server Configuration
   PORT: z.coerce.number().default(3000),

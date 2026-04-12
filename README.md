@@ -6,7 +6,7 @@ AIによる画像生成・ユーザー確認・絵文字登録までを自動化
 ## 機能
 
 - ローカルユーザーからのメンションのみを受け付け
-- GPT-5-miniを使用した絵文字パラメータの自動生成
+- gpt-5.4-miniを使用した絵文字パラメータの自動生成
 - [Emoji Renderer](https://github.com/Soli0222/emoji-renderer) を使用した画像生成
 - Valkey (Redis互換) による対話ステート管理
 - Fibonacci Backoffによる自動再接続
@@ -67,7 +67,7 @@ docker compose up -d
 | `VALKEY_PORT` | Valkeyポート | `6379` |
 | `VALKEY_PASSWORD` | Valkeyパスワード | (なし) |
 | `OPENAI_API_KEY` | OpenAI APIキー | (必須) |
-| `OPENAI_MODEL` | 使用するモデル | `gpt-5-mini-2025-08-07` |
+| `OPENAI_MODEL` | 使用するモデル | `gpt-5.4-mini-2026-03-17` |
 | `PORT` | HTTPサーバーポート | `3000` |
 | `LOG_LEVEL` | ログレベル | `info` |
 | `RATE_LIMIT_MAX_REQUESTS` | レート制限（リクエスト数） | `10` |
