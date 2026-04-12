@@ -5,11 +5,17 @@ import { logger } from '../logger.js';
 const KEY_PREFIX = 'bot:emoji:';
 
 export interface ConversationState {
-  status: 'confirming';
+  status: 'confirming' | 'retaking';
   fileId: string;
   shortcode: string;
   replyToId: string;
   originalText: string;
+}
+
+export interface ConfirmingStateMatcher {
+  status: 'confirming';
+  replyToId: string;
+  fileId: string;
 }
 
 class ValkeyService {
@@ -69,6 +75,69 @@ class ValkeyService {
 
   async deleteState(userId: string): Promise<void> {
     await this.client.del(this.stateKey(userId));
+  }
+
+  async compareAndSetState(
+    userId: string,
+    expected: ConfirmingStateMatcher,
+    newState: ConversationState
+  ): Promise<boolean> {
+    const key = this.stateKey(userId);
+    const luaScript = `
+      local current = redis.call('GET', KEYS[1])
+      if not current then return 0 end
+
+      local parsed = cjson.decode(current)
+      if parsed.status ~= ARGV[1] then return 0 end
+      if parsed.replyToId ~= ARGV[2] then return 0 end
+      if parsed.fileId ~= ARGV[3] then return 0 end
+
+      redis.call('SET', KEYS[1], ARGV[4], 'EX', ARGV[5])
+      return 1
+    `;
+
+    const result = await this.client.eval(
+      luaScript,
+      1,
+      key,
+      expected.status,
+      expected.replyToId,
+      expected.fileId,
+      JSON.stringify(newState),
+      config.STATE_TTL_SECONDS
+    );
+
+    return result === 1;
+  }
+
+  async compareAndDeleteState(
+    userId: string,
+    expected: ConfirmingStateMatcher
+  ): Promise<boolean> {
+    const key = this.stateKey(userId);
+    const luaScript = `
+      local current = redis.call('GET', KEYS[1])
+      if not current then return 0 end
+
+      local parsed = cjson.decode(current)
+      if parsed.status ~= ARGV[1] then return 0 end
+      if parsed.replyToId ~= ARGV[2] then return 0 end
+      if parsed.fileId ~= ARGV[3] then return 0 end
+
+      redis.call('DEL', KEYS[1])
+      return 1
+    `;
+
+    const result = await this.client.eval(
+      luaScript,
+      1,
+      key,
+      expected.status,
+      expected.replyToId,
+      expected.fileId
+    );
+
+    return result === 1;
   }
 
   /**

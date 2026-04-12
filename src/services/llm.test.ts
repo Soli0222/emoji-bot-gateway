@@ -560,4 +560,81 @@ describe('LLM Service', () => {
       );
     });
   });
+
+  describe('classifyUserIntent', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('should classify confirmation intent with fixed system prompt and user payload', async () => {
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: '{"intent":"retake"}' }],
+          },
+        ],
+        output_parsed: { intent: 'retake' },
+      });
+
+      vi.resetModules();
+      const { classifyUserIntent } = await import('../services/llm.js');
+
+      const result = await classifyUserIntent('色を赤にして', {
+        originalText: 'かわいい絵文字を作って',
+        shortcode: 'kawaii',
+      });
+
+      expect(result).toEqual({ intent: 'retake' });
+
+      const callArgs = mockParse.mock.calls[0][0];
+      expect(callArgs).toEqual(
+        expect.objectContaining({
+          model: 'gpt-5-mini-2025-08-07',
+          max_output_tokens: 100,
+        })
+      );
+
+      expect(callArgs.input[0]).toEqual({
+        role: 'system',
+        content: [
+          {
+            type: 'input_text',
+            text: expect.stringContaining('yes / cancel / retake / other'),
+          },
+        ],
+      });
+      expect(callArgs.input[1]).toEqual({
+        role: 'user',
+        content: [
+          {
+            type: 'input_text',
+            text: '元のリクエスト: かわいい絵文字を作って\nショートコード: :kawaii:\nユーザー返信: 色を赤にして',
+          },
+        ],
+      });
+    });
+
+    it('should throw error when intent classification is missing', async () => {
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: '' }],
+          },
+        ],
+        output_parsed: null,
+      });
+
+      vi.resetModules();
+      const { classifyUserIntent } = await import('../services/llm.js');
+
+      await expect(
+        classifyUserIntent('キャンセルでお願いします', {
+          originalText: '絵文字を作って',
+          shortcode: 'test',
+        })
+      ).rejects.toThrow('Failed to classify user intent');
+    });
+  });
 });

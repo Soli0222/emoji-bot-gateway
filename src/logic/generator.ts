@@ -86,5 +86,7 @@ function buildProposalMessage(params: EmojiParams): string {
 🎨 色: ${params.style.textColor}${motionDesc}
 🏷️ ショートコード: \`:${params.shortcode}:\`
 
-この絵文字を登録しますか？（はい/いいえ）`;
+この絵文字を登録しますか？
+登録は「はい」、キャンセルは「いいえ」、
+修正したい場合はそのまま要望を送ってください。`;
 }
