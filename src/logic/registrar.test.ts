@@ -89,6 +89,7 @@ describe('handleConfirmation', () => {
     status: 'confirming',
     fileId: 'file123',
     shortcode: 'test_emoji',
+    isSensitive: false,
     replyToId: 'note123',
     originalText: 'テスト絵文字作って',
   };
@@ -130,6 +131,7 @@ describe('handleConfirmation', () => {
     expect(mockAddEmoji).toHaveBeenCalledWith({
       name: 'test_emoji',
       fileId: 'file123',
+      localOnly: false,
     });
     expect(mockCreateNote).toHaveBeenCalledWith({
       text: ':test_emoji: を登録しました。',
@@ -159,6 +161,19 @@ describe('handleConfirmation', () => {
       replyId: 'replyNote123',
     });
     expect(mockDeleteState).not.toHaveBeenCalled();
+  });
+
+  it('registers sensitive emoji as local-only', async () => {
+    await handleConfirmation('user123', 'はい', 'replyNote123', {
+      ...confirmingState,
+      isSensitive: true,
+    });
+
+    expect(mockAddEmoji).toHaveBeenCalledWith({
+      name: 'test_emoji',
+      fileId: 'file123',
+      localOnly: true,
+    });
   });
 
   it('cancels after consuming the confirming state', async () => {

@@ -65,6 +65,7 @@ describe('LLM Service', () => {
           intensity: 'medium',
         },
         shortcode: 'test_emoji',
+        isSensitive: false,
       };
 
       const result = EmojiParamsSchema.safeParse(validParams);
@@ -84,6 +85,7 @@ describe('LLM Service', () => {
         layout: null,
         motion: null,
         shortcode: 'ok_emoji',
+        isSensitive: false,
       };
 
       const result = EmojiParamsSchema.safeParse(minimalParams);
@@ -97,6 +99,7 @@ describe('LLM Service', () => {
           textColor: '#ffffff',
         },
         shortcode: 'test',
+        isSensitive: false,
       };
 
       const result = EmojiParamsSchema.safeParse(invalidParams);
@@ -107,6 +110,7 @@ describe('LLM Service', () => {
       const invalidParams = {
         text: 'テスト',
         shortcode: 'test',
+        isSensitive: false,
       };
 
       const result = EmojiParamsSchema.safeParse(invalidParams);
@@ -120,6 +124,26 @@ describe('LLM Service', () => {
           fontId: 'notosansjp_black',
           textColor: '#ffffff',
         },
+        isSensitive: false,
+      };
+
+      const result = EmojiParamsSchema.safeParse(invalidParams);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject params without isSensitive', () => {
+      const invalidParams = {
+        text: 'テスト',
+        style: {
+          fontId: 'notosansjp_black',
+          textColor: '#ffffff',
+          outlineColor: null,
+          outlineWidth: null,
+          shadow: null,
+        },
+        layout: null,
+        motion: null,
+        shortcode: 'test',
       };
 
       const result = EmojiParamsSchema.safeParse(invalidParams);
@@ -142,6 +166,7 @@ describe('LLM Service', () => {
           intensity: 'high',
         },
         shortcode: 'test',
+        isSensitive: false,
       };
 
       const result = EmojiParamsSchema.safeParse(params);
@@ -167,6 +192,7 @@ describe('LLM Service', () => {
         },
         motion: null,
         shortcode: 'test',
+        isSensitive: false,
       };
 
       const result = EmojiParamsSchema.safeParse(params);
@@ -184,6 +210,7 @@ describe('LLM Service', () => {
           type: 'invalid_motion',
         },
         shortcode: 'test',
+        isSensitive: false,
       };
 
       const result = EmojiParamsSchema.safeParse(params);
@@ -199,6 +226,7 @@ describe('LLM Service', () => {
           outlineWidth: 25, // max is 20
         },
         shortcode: 'test',
+        isSensitive: false,
       };
 
       const result = EmojiParamsSchema.safeParse(params);
@@ -219,6 +247,7 @@ describe('LLM Service', () => {
           textColor: '#ff0000',
         },
         shortcode: 'yatta',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
@@ -265,6 +294,7 @@ describe('LLM Service', () => {
           textColor: '#000000',
         },
         shortcode: 'test',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
@@ -297,6 +327,7 @@ describe('LLM Service', () => {
           textColor: '#000000',
         },
         shortcode: 'test',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
@@ -328,6 +359,7 @@ describe('LLM Service', () => {
           textColor: '#000000',
         },
         shortcode: 'test',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
@@ -351,6 +383,38 @@ describe('LLM Service', () => {
       expect(systemMessage.content).toContain('Otherwise use banner mode');
     });
 
+    it('should instruct the model to mark sensitive emojis', async () => {
+      const mockResult = {
+        text: 'テスト',
+        style: {
+          fontId: 'font_a',
+          textColor: '#000000',
+        },
+        shortcode: 'test',
+        isSensitive: false,
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      await generateEmojiParams('テスト', ['Font A']);
+
+      const callArgs = mockParse.mock.calls[0][0];
+      const systemMessage = callArgs.input.find((m: { role: string }) => m.role === 'system');
+      expect(systemMessage.content).toContain('Mark isSensitive as true');
+      expect(systemMessage.content).toContain('sexual, violent, discriminatory');
+    });
+
     it('should force square mode for short text', async () => {
       const mockResult = {
         text: 'OK',
@@ -363,6 +427,7 @@ describe('LLM Service', () => {
           alignment: 'right',
         },
         shortcode: 'ok',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
@@ -398,6 +463,7 @@ describe('LLM Service', () => {
           alignment: 'center',
         },
         shortcode: 'yatta',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
@@ -430,6 +496,7 @@ describe('LLM Service', () => {
         },
         layout: null,
         shortcode: 'multi_line',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
@@ -465,6 +532,7 @@ describe('LLM Service', () => {
           intensity: 'high',
         },
         shortcode: 'yatta',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
@@ -498,6 +566,7 @@ describe('LLM Service', () => {
           intensity: 'high',
         },
         shortcode: 'yatta',
+        isSensitive: false,
       };
 
       mockParse.mockResolvedValue({
