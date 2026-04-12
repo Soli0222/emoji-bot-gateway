@@ -41,6 +41,43 @@ export interface LLMResult {
   explanation: string;
 }
 
+const MOTION_REQUEST_PATTERN =
+  /(アニメ(?:ーション)?|動く|動き|gif|animated?|animation|motion|shake|spin|bounce|gaming|揺れ|揺れる|回転)/i;
+
+function shouldAllowMotion(userMessage: string): boolean {
+  return MOTION_REQUEST_PATTERN.test(userMessage);
+}
+
+function countCharacters(text: string): number {
+  return Array.from(text).length;
+}
+
+function selectLayoutMode(text: string): 'square' | 'banner' {
+  const lines = text.split('\n');
+
+  return lines.every((line) => countCharacters(line) <= 2) ? 'square' : 'banner';
+}
+
+function normalizeEmojiParams(parsed: EmojiParams, userMessage: string): EmojiParams {
+  const normalizedLayout = {
+    mode: selectLayoutMode(parsed.text),
+    alignment: parsed.layout?.alignment ?? null,
+  };
+
+  if (shouldAllowMotion(userMessage)) {
+    return {
+      ...parsed,
+      layout: normalizedLayout,
+    };
+  }
+
+  return {
+    ...parsed,
+    layout: normalizedLayout,
+    motion: null,
+  };
+}
+
 export async function generateEmojiParams(
   userMessage: string,
   fontList: string[]
@@ -56,9 +93,10 @@ Guidelines:
 3. Keep text concise for emoji display (ideally 1-4 characters or short words, max 20 chars)
 4. Select colors that enhance readability and visual appeal (use hex format like #FF0000)
 5. Consider the context and tone of the user's request
-6. Use motion effects when appropriate (shake for excitement, spin for fun, bounce for playful, gaming for rainbow effect)
-7. Add outline (outlineWidth > 0) for better readability on various backgrounds
-8. Use \\n for multi-line text`;
+6. Default to a static emoji. Only use motion effects when the user explicitly asks for animation or movement. Do not add motion just because the tone is playful or excited
+7. Use square mode when each line is about 2 characters or less. Otherwise use banner mode
+8. Add outline (outlineWidth > 0) for better readability on various backgrounds
+9. Use \\n for multi-line text`;
 
   const response = await openai.responses.parse({
     model: config.OPENAI_MODEL,
@@ -89,12 +127,14 @@ Guidelines:
     throw new Error('Failed to generate emoji parameters');
   }
 
-  const motionDesc = parsed.motion?.type && parsed.motion.type !== 'none' 
-    ? `（${parsed.motion.type}アニメーション付き）` 
+  const normalized = normalizeEmojiParams(parsed, userMessage);
+
+  const motionDesc = normalized.motion?.type && normalized.motion.type !== 'none'
+    ? `（${normalized.motion.type}アニメーション付き）`
     : '';
 
   return {
-    params: parsed,
-    explanation: `テキスト「${parsed.text}」をフォント「${parsed.style.fontId}」で作成します${motionDesc}。`,
+    params: normalized,
+    explanation: `テキスト「${normalized.text}」をフォント「${normalized.style.fontId}」で作成します${motionDesc}。`,
   };
 }

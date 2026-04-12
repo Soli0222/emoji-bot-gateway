@@ -236,7 +236,14 @@ describe('LLM Service', () => {
 
       const result = await generateEmojiParams('嬉しい絵文字作って', ['notosansjp_black', 'mplus1_black']);
 
-      expect(result.params).toEqual(mockResult);
+      expect(result.params).toEqual({
+        ...mockResult,
+        layout: {
+          mode: 'banner',
+          alignment: null,
+        },
+        motion: null,
+      });
       expect(result.explanation).toContain('やったー');
       expect(result.explanation).toContain('notosansjp_black');
       expect(mockParse).toHaveBeenCalledWith(
@@ -280,6 +287,239 @@ describe('LLM Service', () => {
       expect(systemMessage.content).toContain('Font A');
       expect(systemMessage.content).toContain('Font B');
       expect(systemMessage.content).toContain('Font C');
+    });
+
+    it('should instruct the model to avoid motion unless explicitly requested', async () => {
+      const mockResult = {
+        text: 'テスト',
+        style: {
+          fontId: 'font_a',
+          textColor: '#000000',
+        },
+        shortcode: 'test',
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      await generateEmojiParams('テスト', ['Font A']);
+
+      const callArgs = mockParse.mock.calls[0][0];
+      const systemMessage = callArgs.input.find((m: { role: string }) => m.role === 'system');
+      expect(systemMessage.content).toContain('Default to a static emoji');
+      expect(systemMessage.content).toContain('Only use motion effects when the user explicitly asks');
+    });
+
+    it('should instruct the model how to choose square vs banner mode', async () => {
+      const mockResult = {
+        text: 'テスト',
+        style: {
+          fontId: 'font_a',
+          textColor: '#000000',
+        },
+        shortcode: 'test',
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      await generateEmojiParams('テスト', ['Font A']);
+
+      const callArgs = mockParse.mock.calls[0][0];
+      const systemMessage = callArgs.input.find((m: { role: string }) => m.role === 'system');
+      expect(systemMessage.content).toContain('Use square mode when each line is about 2 characters or less');
+      expect(systemMessage.content).toContain('Otherwise use banner mode');
+    });
+
+    it('should force square mode for short text', async () => {
+      const mockResult = {
+        text: 'OK',
+        style: {
+          fontId: 'notosansjp_black',
+          textColor: '#ff0000',
+        },
+        layout: {
+          mode: 'banner',
+          alignment: 'right',
+        },
+        shortcode: 'ok',
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      const result = await generateEmojiParams('短い絵文字作って', ['notosansjp_black']);
+
+      expect(result.params.layout).toEqual({
+        mode: 'square',
+        alignment: 'right',
+      });
+    });
+
+    it('should force banner mode for longer text', async () => {
+      const mockResult = {
+        text: 'やったー',
+        style: {
+          fontId: 'notosansjp_black',
+          textColor: '#ff0000',
+        },
+        layout: {
+          mode: 'square',
+          alignment: 'center',
+        },
+        shortcode: 'yatta',
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      const result = await generateEmojiParams('嬉しい絵文字作って', ['notosansjp_black']);
+
+      expect(result.params.layout).toEqual({
+        mode: 'banner',
+        alignment: 'center',
+      });
+    });
+
+    it('should use square mode when every line is 2 characters or less', async () => {
+      const mockResult = {
+        text: 'わー\nいえ',
+        style: {
+          fontId: 'notosansjp_black',
+          textColor: '#ff0000',
+        },
+        layout: null,
+        shortcode: 'multi_line',
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      const result = await generateEmojiParams('2行の短い絵文字作って', ['notosansjp_black']);
+
+      expect(result.params.layout).toEqual({
+        mode: 'square',
+        alignment: null,
+      });
+    });
+
+    it('should strip motion when the user did not explicitly request animation', async () => {
+      const mockResult = {
+        text: 'やったー',
+        style: {
+          fontId: 'notosansjp_black',
+          textColor: '#ff0000',
+        },
+        motion: {
+          type: 'bounce',
+          intensity: 'high',
+        },
+        shortcode: 'yatta',
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      const result = await generateEmojiParams('嬉しい絵文字作って', ['notosansjp_black']);
+
+      expect(result.params.motion).toBeNull();
+      expect(result.explanation).not.toContain('アニメーション');
+    });
+
+    it('should keep motion when the user explicitly requests animation', async () => {
+      const mockResult = {
+        text: 'やったー',
+        style: {
+          fontId: 'notosansjp_black',
+          textColor: '#ff0000',
+        },
+        motion: {
+          type: 'bounce',
+          intensity: 'high',
+        },
+        shortcode: 'yatta',
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      const result = await generateEmojiParams('動く嬉しい絵文字作って', ['notosansjp_black']);
+
+      expect(result.params.motion).toEqual({
+        type: 'bounce',
+        intensity: 'high',
+      });
+      expect(result.explanation).toContain('bounceアニメーション');
     });
 
     it('should throw error when output_parsed is null', async () => {
