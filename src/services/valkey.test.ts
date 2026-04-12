@@ -5,6 +5,7 @@ const mockRedisInstance = {
   get: vi.fn(),
   set: vi.fn(),
   del: vi.fn(),
+  eval: vi.fn(),
   zadd: vi.fn(),
   zcard: vi.fn(),
   zremrangebyscore: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('ioredis', () => {
       get = mockRedisInstance.get;
       set = mockRedisInstance.set;
       del = mockRedisInstance.del;
+      eval = mockRedisInstance.eval;
       zadd = mockRedisInstance.zadd;
       zcard = mockRedisInstance.zcard;
       zremrangebyscore = mockRedisInstance.zremrangebyscore;
@@ -129,6 +131,97 @@ describe('ValkeyService', () => {
       await valkey.deleteState('user123');
 
       expect(mockRedisInstance.del).toHaveBeenCalledWith('bot:emoji:state:user123');
+    });
+  });
+
+  describe('compareAndSetState', () => {
+    it('should update state when the CAS script succeeds', async () => {
+      const newState = {
+        status: 'retaking' as const,
+        fileId: 'file123',
+        shortcode: 'test_emoji',
+        replyToId: 'note123',
+        originalText: 'test',
+      };
+      mockRedisInstance.eval.mockResolvedValue(1);
+
+      const result = await valkey.compareAndSetState(
+        'user123',
+        {
+          status: 'confirming',
+          replyToId: 'note123',
+          fileId: 'file123',
+        },
+        newState
+      );
+
+      expect(result).toBe(true);
+      expect(mockRedisInstance.eval).toHaveBeenCalledWith(
+        expect.any(String),
+        1,
+        'bot:emoji:state:user123',
+        'confirming',
+        'note123',
+        'file123',
+        JSON.stringify(newState),
+        600
+      );
+    });
+
+    it('should return false when the CAS script does not match', async () => {
+      mockRedisInstance.eval.mockResolvedValue(0);
+
+      const result = await valkey.compareAndSetState(
+        'user123',
+        {
+          status: 'confirming',
+          replyToId: 'note123',
+          fileId: 'file123',
+        },
+        {
+          status: 'retaking',
+          fileId: 'file123',
+          shortcode: 'test_emoji',
+          replyToId: 'note123',
+          originalText: 'test',
+        }
+      );
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('compareAndDeleteState', () => {
+    it('should delete state when the CAS script succeeds', async () => {
+      mockRedisInstance.eval.mockResolvedValue(1);
+
+      const result = await valkey.compareAndDeleteState('user123', {
+        status: 'confirming',
+        replyToId: 'note123',
+        fileId: 'file123',
+      });
+
+      expect(result).toBe(true);
+      expect(mockRedisInstance.eval).toHaveBeenCalledWith(
+        expect.any(String),
+        1,
+        'bot:emoji:state:user123',
+        'confirming',
+        'note123',
+        'file123'
+      );
+    });
+
+    it('should return false when the delete CAS script does not match', async () => {
+      mockRedisInstance.eval.mockResolvedValue(0);
+
+      const result = await valkey.compareAndDeleteState('user123', {
+        status: 'confirming',
+        replyToId: 'note123',
+        fileId: 'file123',
+      });
+
+      expect(result).toBe(false);
     });
   });
 

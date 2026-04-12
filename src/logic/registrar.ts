@@ -1,9 +1,13 @@
 import { valkey, type ConversationState } from '../services/valkey.js';
 import { addEmoji, createNote } from '../services/misskey.js';
+import { classifyUserIntent } from '../services/llm.js';
 import { generateAndPropose } from './generator.js';
 import { logger } from '../logger.js';
 
-export type UserIntent = 'yes' | 'no' | 'unknown';
+export type UserIntent = 'yes' | 'cancel' | 'retake' | 'unknown';
+
+const STALE_CONFIRMATION_MESSAGE =
+  'この確認はすでに処理済みです。最新の案内を確認してください。';
 
 /**
  * Analyze user's response to determine intent
@@ -11,15 +15,13 @@ export type UserIntent = 'yes' | 'no' | 'unknown';
 export function analyzeUserResponse(text: string): UserIntent {
   const normalizedText = text.toLowerCase().trim();
 
-  // Positive responses
   const positivePatterns = [
-    /^(はい|yes|ok|おk|おけ|お願い|登録|いいよ|いいね|それで|頼む|よろしく)/,
+    /^(はい|yes|ok|おk|おけ|お願い(します)?|登録(して)?|いいよ|いいね|それで|頼む|よろしく)[!！。]*$/,
     /👍|⭕|✅|🙆/,
   ];
 
-  // Negative responses
-  const negativePatterns = [
-    /^(いいえ|no|ダメ|だめ|やめ|キャンセル|cancel|作り直|やり直|違う|ちがう|却下)/,
+  const cancelPatterns = [
+    /^(いいえ|no|ダメ|だめ|やめ(ます)?|キャンセル|cancel|違う|ちがう|却下)[!！。]*$/,
     /👎|❌|🙅|✖/,
   ];
 
@@ -29,9 +31,9 @@ export function analyzeUserResponse(text: string): UserIntent {
     }
   }
 
-  for (const pattern of negativePatterns) {
+  for (const pattern of cancelPatterns) {
     if (pattern.test(normalizedText)) {
-      return 'no';
+      return 'cancel';
     }
   }
 
@@ -47,19 +49,50 @@ export async function handleConfirmation(
   replyToNoteId: string,
   state: ConversationState
 ): Promise<void> {
-  const intent = analyzeUserResponse(userMessage);
+  if (state.status === 'retaking') {
+    await createNote({
+      text: '再生成中です。少々お待ちください…',
+      replyId: replyToNoteId,
+    });
+    return;
+  }
+
+  let intent: UserIntent = analyzeUserResponse(userMessage);
+
+  if (intent === 'unknown') {
+    try {
+      const result = await classifyUserIntent(userMessage, {
+        originalText: state.originalText,
+        shortcode: state.shortcode,
+      });
+
+      if (result.intent === 'other') {
+        await handleUnknown(replyToNoteId);
+        return;
+      }
+
+      intent = result.intent;
+    } catch (error) {
+      logger.error(
+        { err: error, userId, userMessage },
+        'Intent classification failed, falling back to guidance'
+      );
+      await handleUnknown(replyToNoteId);
+      return;
+    }
+  }
 
   switch (intent) {
     case 'yes':
       await handleYes(userId, replyToNoteId, state);
       break;
 
-    case 'no':
-      await handleNo(userId, userMessage, replyToNoteId, state);
+    case 'cancel':
+      await handleNo(userId, replyToNoteId, state);
       break;
 
-    case 'unknown':
-      await handleUnknown(replyToNoteId);
+    case 'retake':
+      await handleRetake(userId, userMessage, replyToNoteId, state);
       break;
   }
 }
@@ -70,18 +103,27 @@ async function handleYes(
   state: ConversationState
 ): Promise<void> {
   try {
-    // Register the emoji
+    const consumed = await valkey.compareAndDeleteState(userId, {
+      status: 'confirming',
+      replyToId: state.replyToId,
+      fileId: state.fileId,
+    });
+
+    if (!consumed) {
+      await createNote({
+        text: STALE_CONFIRMATION_MESSAGE,
+        replyId: replyToNoteId,
+      });
+      return;
+    }
+
     await addEmoji({
       name: state.shortcode,
       fileId: state.fileId,
     });
 
-    // Clear the state
-    await valkey.deleteState(userId);
-
-    // Send success message
     await createNote({
-      text: `絵文字を登録しました！ :${state.shortcode}: でお使いいただけます！`,
+      text: `:${state.shortcode}: を登録しました。`,
       replyId: replyToNoteId,
     });
 
@@ -93,59 +135,102 @@ async function handleYes(
       text: '絵文字の登録中にエラーが発生しました。ショートコードが既に使用されている可能性があります。',
       replyId: replyToNoteId,
     });
-
-    // Clear state on error
-    await valkey.deleteState(userId);
   }
 }
 
 async function handleNo(
   userId: string,
-  userMessage: string,
   replyToNoteId: string,
-  _state: ConversationState
+  state: ConversationState
 ): Promise<void> {
-  // Clear the current state
-  await valkey.deleteState(userId);
+  const consumed = await valkey.compareAndDeleteState(userId, {
+    status: 'confirming',
+    replyToId: state.replyToId,
+    fileId: state.fileId,
+  });
 
-  // Send acknowledgment
+  if (!consumed) {
+    await createNote({
+      text: STALE_CONFIRMATION_MESSAGE,
+      replyId: replyToNoteId,
+    });
+    return;
+  }
+
   await createNote({
-    text: '承知しました。キャンセルしますね。新しいリクエストをお待ちしています！',
+    text: '承知しました。今回はキャンセルします。',
     replyId: replyToNoteId,
   });
 
   logger.info({ userId }, 'User rejected proposal, cleared state');
-
-  // Strip the rejection keyword and separators to extract new request if any
-  const newRequest = extractNewRequest(userMessage);
-
-  if (newRequest) {
-    // Re-enter Phase 2 with only the new request (rejection prefix stripped)
-    await generateAndPropose(userId, newRequest, replyToNoteId);
-  }
 }
 
-/**
- * Extract new request from a rejection message by stripping the rejection keyword and separators.
- * Returns the remaining text if it contains a meaningful new request, or null otherwise.
- */
-export function extractNewRequest(message: string): string | null {
-  const stripped = message
-    .replace(/^(いいえ|no|ダメ|だめ|やめて?|キャンセル|cancel|作り直し?て?|やり直し?て?|違う|ちがう|却下)/i, '')
-    .replace(/^[、,，。.\s]+/, '') // Remove leading punctuation/separators
-    .trim();
-
-  // Only treat as a new request if there's meaningful content remaining
-  if (stripped.length === 0) {
-    return null;
+async function handleRetake(
+  userId: string,
+  userMessage: string,
+  replyToNoteId: string,
+  state: ConversationState
+): Promise<void> {
+  const allowed = await valkey.checkRateLimit(userId);
+  if (!allowed) {
+    await createNote({
+      text: 'リクエストが多すぎます。少し時間をおいてからお試しください。',
+      replyId: replyToNoteId,
+    });
+    return;
   }
 
-  return stripped;
+  const transitioned = await valkey.compareAndSetState(
+    userId,
+    {
+      status: 'confirming',
+      replyToId: state.replyToId,
+      fileId: state.fileId,
+    },
+    {
+      ...state,
+      status: 'retaking',
+    }
+  );
+
+  if (!transitioned) {
+    await createNote({
+      text: STALE_CONFIRMATION_MESSAGE,
+      replyId: replyToNoteId,
+    });
+    return;
+  }
+
+  let restorePreviousConfirming = true;
+
+  try {
+    const retakeMessage = `${state.originalText}\n\n修正依頼: ${userMessage}`;
+    const result = await generateAndPropose(userId, retakeMessage, replyToNoteId);
+
+    if (result.success) {
+      restorePreviousConfirming = false;
+    }
+  } finally {
+    if (restorePreviousConfirming) {
+      try {
+        await valkey.setState(userId, {
+          ...state,
+          status: 'confirming',
+        });
+      } catch (rollbackError) {
+        logger.error(
+          { err: rollbackError, userId },
+          'Failed to restore confirming state after retake; deleting conversation state'
+        );
+        await valkey.deleteState(userId);
+      }
+    }
+  }
 }
 
 async function handleUnknown(replyToNoteId: string): Promise<void> {
   await createNote({
-    text: '「はい」または「いいえ」でお答えください。登録する場合は「はい」、作り直す場合は「いいえ」と返信してください。',
+    text: '登録する場合は「はい」、キャンセルは「いいえ」、修正したい場合はそのまま要望を送ってください。',
     replyId: replyToNoteId,
   });
 }
