@@ -73,15 +73,21 @@ describe('analyzeUserResponse', () => {
   );
 
   it.each([
-    'ありがとう',
-    'いいえ、もっと可愛く',
     'やり直し',
     '作り直して',
+    '画像の下部が若干途切れているので作り直して',
     '色を赤にして',
-    '',
-  ])('detects "%s" as unknown', (input) => {
-    expect(analyzeUserResponse(input)).toBe('unknown');
+    'もっと丸くして',
+  ])('detects "%s" as retake', (input) => {
+    expect(analyzeUserResponse(input)).toBe('retake');
   });
+
+  it.each(['ありがとう', 'いいえ、もっと可愛く', '', '今日の天気を教えて'])(
+    'detects "%s" as unknown',
+    (input) => {
+      expect(analyzeUserResponse(input)).toBe('unknown');
+    }
+  );
 });
 
 describe('handleConfirmation', () => {

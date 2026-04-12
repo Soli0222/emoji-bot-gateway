@@ -84,6 +84,8 @@ const IntentSchema = z.object({
 });
 
 export type IntentClassification = z.infer<typeof IntentSchema>;
+const INTENT_CLASSIFICATION_MAX_OUTPUT_TOKENS = 256;
+const INTENT_CLASSIFICATION_RETRY_MAX_OUTPUT_TOKENS = 512;
 
 export async function generateEmojiParams(
   userMessage: string,
@@ -151,14 +153,14 @@ export async function classifyUserIntent(
   userMessage: string,
   context: { originalText: string; shortcode: string }
 ): Promise<IntentClassification> {
-  const response = await openai.responses.parse({
+  const request = {
     model: config.OPENAI_MODEL,
     input: [
       {
-        role: 'system',
+        role: 'system' as const,
         content: [
           {
-            type: 'input_text',
+            type: 'input_text' as const,
             text: [
               'あなたは絵文字作成ボットの確認応答分類器です。',
               '返答は yes / cancel / retake / other のいずれかに分類します。',
@@ -169,10 +171,10 @@ export async function classifyUserIntent(
         ],
       },
       {
-        role: 'user',
+        role: 'user' as const,
         content: [
           {
-            type: 'input_text',
+            type: 'input_text' as const,
             text: [
               `元のリクエスト: ${context.originalText}`,
               `ショートコード: :${context.shortcode}:`,
@@ -184,9 +186,33 @@ export async function classifyUserIntent(
     ],
     text: {
       format: zodTextFormat(IntentSchema, 'intent_classification'),
+      verbosity: 'low' as const,
     },
-    max_output_tokens: 100,
+    reasoning: {
+      effort: 'low' as const,
+    },
+  };
+
+  let response = await openai.responses.parse({
+    ...request,
+    max_output_tokens: INTENT_CLASSIFICATION_MAX_OUTPUT_TOKENS,
   });
+
+  if (!response.output_parsed && response.incomplete_details?.reason === 'max_output_tokens') {
+    logger.warn(
+      {
+        userMessage,
+        reason: response.incomplete_details.reason,
+        maxOutputTokens: INTENT_CLASSIFICATION_MAX_OUTPUT_TOKENS,
+      },
+      'Intent classification hit max_output_tokens, retrying with a larger limit'
+    );
+
+    response = await openai.responses.parse({
+      ...request,
+      max_output_tokens: INTENT_CLASSIFICATION_RETRY_MAX_OUTPUT_TOKENS,
+    });
+  }
 
   const parsed = response.output_parsed;
   if (!parsed) {

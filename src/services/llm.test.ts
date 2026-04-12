@@ -660,7 +660,13 @@ describe('LLM Service', () => {
       expect(callArgs).toEqual(
         expect.objectContaining({
           model: 'gpt-5-mini-2025-08-07',
-          max_output_tokens: 100,
+          max_output_tokens: 256,
+          reasoning: { effort: 'low' },
+        })
+      );
+      expect(callArgs.text).toEqual(
+        expect.objectContaining({
+          verbosity: 'low',
         })
       );
 
@@ -704,6 +710,51 @@ describe('LLM Service', () => {
           shortcode: 'test',
         })
       ).rejects.toThrow('Failed to classify user intent');
+    });
+
+    it('should retry intent classification when the first response hits max_output_tokens', async () => {
+      mockParse
+        .mockResolvedValueOnce({
+          output: [
+            {
+              type: 'reasoning',
+              summary: [],
+            },
+          ],
+          incomplete_details: { reason: 'max_output_tokens' },
+          output_parsed: null,
+        })
+        .mockResolvedValueOnce({
+          output: [
+            {
+              type: 'message',
+              content: [{ type: 'text', text: '{"intent":"retake"}' }],
+            },
+          ],
+          output_parsed: { intent: 'retake' },
+        });
+
+      vi.resetModules();
+      const { classifyUserIntent } = await import('../services/llm.js');
+
+      await expect(
+        classifyUserIntent('画像の下部が若干途切れているので作り直して', {
+          originalText: '絵文字を作って',
+          shortcode: 'test',
+        })
+      ).resolves.toEqual({ intent: 'retake' });
+
+      expect(mockParse).toHaveBeenCalledTimes(2);
+      expect(mockParse.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          max_output_tokens: 256,
+        })
+      );
+      expect(mockParse.mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          max_output_tokens: 512,
+        })
+      );
     });
   });
 });
