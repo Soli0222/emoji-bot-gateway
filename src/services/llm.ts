@@ -48,13 +48,32 @@ function shouldAllowMotion(userMessage: string): boolean {
   return MOTION_REQUEST_PATTERN.test(userMessage);
 }
 
+function countCharacters(text: string): number {
+  return Array.from(text).length;
+}
+
+function selectLayoutMode(text: string): 'square' | 'banner' {
+  const lines = text.split('\n');
+
+  return lines.every((line) => countCharacters(line) <= 2) ? 'square' : 'banner';
+}
+
 function normalizeEmojiParams(parsed: EmojiParams, userMessage: string): EmojiParams {
+  const normalizedLayout = {
+    mode: selectLayoutMode(parsed.text),
+    alignment: parsed.layout?.alignment ?? null,
+  };
+
   if (shouldAllowMotion(userMessage)) {
-    return parsed;
+    return {
+      ...parsed,
+      layout: normalizedLayout,
+    };
   }
 
   return {
     ...parsed,
+    layout: normalizedLayout,
     motion: null,
   };
 }
@@ -75,8 +94,9 @@ Guidelines:
 4. Select colors that enhance readability and visual appeal (use hex format like #FF0000)
 5. Consider the context and tone of the user's request
 6. Default to a static emoji. Only use motion effects when the user explicitly asks for animation or movement. Do not add motion just because the tone is playful or excited
-7. Add outline (outlineWidth > 0) for better readability on various backgrounds
-8. Use \\n for multi-line text`;
+7. Use square mode when each line is about 2 characters or less. Otherwise use banner mode
+8. Add outline (outlineWidth > 0) for better readability on various backgrounds
+9. Use \\n for multi-line text`;
 
   const response = await openai.responses.parse({
     model: config.OPENAI_MODEL,
