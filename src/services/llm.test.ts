@@ -8,7 +8,7 @@ const mockParse = vi.fn();
 vi.mock('../config.js', () => ({
   config: {
     OPENAI_API_KEY: 'test-api-key',
-    OPENAI_MODEL: 'gpt-5-mini-2025-08-07',
+    OPENAI_MODEL: 'gpt-5.4-mini-2026-03-17',
     LOG_LEVEL: 'info',
   },
 }));
@@ -277,7 +277,7 @@ describe('LLM Service', () => {
       expect(result.explanation).toContain('notosansjp_black');
       expect(mockParse).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: 'gpt-5-mini-2025-08-07',
+          model: 'gpt-5.4-mini-2026-03-17',
           input: expect.arrayContaining([
             expect.objectContaining({ role: 'system' }),
             expect.objectContaining({ role: 'user', content: '嬉しい絵文字作って' }),
@@ -659,7 +659,7 @@ describe('LLM Service', () => {
       const callArgs = mockParse.mock.calls[0][0];
       expect(callArgs).toEqual(
         expect.objectContaining({
-          model: 'gpt-5-mini-2025-08-07',
+          model: 'gpt-5.4-mini-2026-03-17',
           max_output_tokens: 256,
           reasoning: { effort: 'low' },
         })
