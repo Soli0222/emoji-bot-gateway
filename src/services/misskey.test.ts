@@ -145,6 +145,28 @@ describe('Misskey Service', () => {
       });
     });
 
+    it('should register sensitive proposals as local-only when requested', async () => {
+      mockRequest.mockResolvedValue({});
+
+      vi.resetModules();
+      const { addEmoji } = await import('../services/misskey.js');
+
+      await addEmoji({
+        name: 'sensitive_emoji',
+        fileId: 'file789',
+        localOnly: true,
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith('admin/emoji/add', {
+        name: 'sensitive_emoji',
+        fileId: 'file789',
+        category: undefined,
+        aliases: [],
+        isSensitive: false,
+        localOnly: true,
+      });
+    });
+
     it('should register emoji without category', async () => {
       mockRequest.mockResolvedValue({});
 

@@ -85,6 +85,7 @@ describe('ValkeyService', () => {
         status: 'confirming',
         fileId: 'file123',
         shortcode: 'test_emoji',
+        isSensitive: false,
         replyToId: 'note123',
         originalText: 'test',
       };
@@ -111,6 +112,7 @@ describe('ValkeyService', () => {
         status: 'confirming' as const,
         fileId: 'file123',
         shortcode: 'test_emoji',
+        isSensitive: false,
         replyToId: 'note123',
         originalText: 'test',
       };
@@ -140,6 +142,7 @@ describe('ValkeyService', () => {
         status: 'retaking' as const,
         fileId: 'file123',
         shortcode: 'test_emoji',
+        isSensitive: false,
         replyToId: 'note123',
         originalText: 'test',
       };
@@ -182,6 +185,7 @@ describe('ValkeyService', () => {
           status: 'retaking',
           fileId: 'file123',
           shortcode: 'test_emoji',
+          isSensitive: false,
           replyToId: 'note123',
           originalText: 'test',
         }

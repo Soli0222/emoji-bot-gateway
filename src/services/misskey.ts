@@ -65,6 +65,7 @@ export async function addEmoji(params: {
   name: string;
   fileId: string;
   category?: string;
+  localOnly?: boolean;
 }): Promise<void> {
   await client.request('admin/emoji/add', {
     name: params.name,
@@ -72,7 +73,7 @@ export async function addEmoji(params: {
     category: params.category,
     aliases: [],
     isSensitive: false,
-    localOnly: false,
+    localOnly: params.localOnly ?? false,
   });
 
   logger.info({ name: params.name }, 'Emoji registered');

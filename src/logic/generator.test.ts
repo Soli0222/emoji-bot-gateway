@@ -78,6 +78,7 @@ describe('Generator Logic', () => {
             textColor: '#ffffff',
           },
           shortcode: 'test_emoji',
+          isSensitive: false,
         } as EmojiParams,
         explanation: 'テスト絵文字',
       });
@@ -104,6 +105,7 @@ describe('Generator Logic', () => {
         status: 'confirming',
         fileId: 'file123',
         shortcode: 'test_emoji',
+        isSensitive: false,
       }));
       expect(mockMisskey.createNote).toHaveBeenCalled();
     });
@@ -118,6 +120,7 @@ describe('Generator Logic', () => {
             textColor: '#ffffff',
           },
           shortcode: 'test_emoji',
+          isSensitive: false,
         } as EmojiParams,
         explanation: 'テスト絵文字',
       });
@@ -142,7 +145,7 @@ describe('Generator Logic', () => {
       expect(mockMisskey.uploadFile).toHaveBeenCalledWith(expect.any(Buffer), 'test_emoji_2');
       expect(mockValkey.setState).toHaveBeenCalledWith(
         'user123',
-        expect.objectContaining({ shortcode: 'test_emoji_2' })
+        expect.objectContaining({ shortcode: 'test_emoji_2', isSensitive: false })
       );
       expect(mockMisskey.createNote).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -161,6 +164,7 @@ describe('Generator Logic', () => {
             textColor: '#ffffff',
           },
           shortcode: 'test_emoji',
+          isSensitive: false,
         } as EmojiParams,
         explanation: 'テスト絵文字',
       });
@@ -187,6 +191,41 @@ describe('Generator Logic', () => {
       expect(mockMisskey.uploadFile).toHaveBeenCalledWith(expect.any(Buffer), 'test_emoji_0000');
 
       randomSpy.mockRestore();
+    });
+
+    it('should include a local-only warning for sensitive emoji proposals', async () => {
+      mockRenderer.fetchFontList.mockResolvedValue(['notosansjp_black']);
+      mockLlm.generateEmojiParams.mockResolvedValue({
+        params: {
+          text: 'NSFW',
+          style: {
+            fontId: 'notosansjp_black',
+            textColor: '#ffffff',
+          },
+          shortcode: 'sensitive_emoji',
+          isSensitive: true,
+        } as EmojiParams,
+        explanation: 'センシティブ絵文字',
+      });
+      mockRenderer.renderEmoji.mockResolvedValue(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+      mockMisskey.isShortcodeTaken.mockResolvedValue(false);
+      mockMisskey.uploadFile.mockResolvedValue({ id: 'file123', url: 'https://example.com/file.png' });
+      mockMisskey.createNote.mockResolvedValue({ createdNote: { id: 'note456' } });
+
+      const { generateAndPropose } = await import('../logic/generator.js');
+
+      const result = await generateAndPropose('user123', 'センシティブな絵文字作って', 'replyNote123');
+
+      expect(result.success).toBe(true);
+      expect(mockValkey.setState).toHaveBeenCalledWith(
+        'user123',
+        expect.objectContaining({ isSensitive: true })
+      );
+      expect(mockMisskey.createNote).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('ローカル限定で登録されます'),
+        })
+      );
     });
 
     it('should handle errors gracefully', async () => {

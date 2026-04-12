@@ -94,6 +94,7 @@ describe('Renderer Service', () => {
         },
         motion: null,
         shortcode: 'test_emoji',
+        isSensitive: false,
       };
 
       const mockImageData = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
@@ -144,6 +145,7 @@ describe('Renderer Service', () => {
           intensity: 'high',
         },
         shortcode: 'anime_emoji',
+        isSensitive: false,
       };
 
       const mockImageData = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
@@ -188,6 +190,7 @@ describe('Renderer Service', () => {
         layout: null,
         motion: null,
         shortcode: 'simple',
+        isSensitive: false,
       };
 
       const mockImageData = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
@@ -227,6 +230,7 @@ describe('Renderer Service', () => {
         layout: null,
         motion: null,
         shortcode: 'test_emoji',
+        isSensitive: false,
       };
 
       global.fetch = vi.fn().mockResolvedValue({

@@ -8,6 +8,7 @@ export interface ConversationState {
   status: 'confirming' | 'retaking';
   fileId: string;
   shortcode: string;
+  isSensitive: boolean;
   replyToId: string;
   originalText: string;
 }

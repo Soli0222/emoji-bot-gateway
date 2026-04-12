@@ -120,6 +120,7 @@ async function handleYes(
     await addEmoji({
       name: state.shortcode,
       fileId: state.fileId,
+      localOnly: state.isSensitive,
     });
 
     await createNote({

@@ -48,6 +48,7 @@ export async function generateAndPropose(
       status: 'confirming',
       fileId: uploadResult.id,
       shortcode: resolvedParams.shortcode,
+      isSensitive: resolvedParams.isSensitive,
       replyToId: replyToNoteId,
       originalText: userMessage,
     };
@@ -115,16 +116,19 @@ function generateRandomSuffix(length: number): string {
 }
 
 function buildProposalMessage(params: EmojiParams): string {
-  const motionDesc = params.motion?.type && params.motion.type !== 'none' 
-    ? `\n🎬 アニメーション: ${params.motion.type}` 
+  const motionDesc = params.motion?.type && params.motion.type !== 'none'
+    ? `\n🎬 アニメーション: ${params.motion.type}`
     : '';
-  
+  const sensitiveNotice = params.isSensitive
+    ? '\n⚠ この絵文字はセンシティブと判定されたため、ローカル限定で登録されます。'
+    : '';
+
   return `絵文字を作成しました！
 
 📝 テキスト: ${params.text}
 🔤 フォント: ${params.style.fontId}
 🎨 色: ${params.style.textColor}${motionDesc}
-🏷️ ショートコード: \`:${params.shortcode}:\`
+🏷️ ショートコード: \`:${params.shortcode}:\`${sensitiveNotice}
 
 この絵文字を登録しますか？
 登録は「はい」、キャンセルは「いいえ」、

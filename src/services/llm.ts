@@ -32,6 +32,7 @@ export const EmojiParamsSchema = z.object({
     })
     .nullable(),
   shortcode: z.string().describe('Suggested shortcode for the emoji (lowercase alphanumeric and underscores only)'),
+  isSensitive: z.boolean().describe('Whether the emoji is sensitive, such as sexual, violent, discriminatory, or otherwise inappropriate'),
 });
 
 export type EmojiParams = z.infer<typeof EmojiParamsSchema>;
@@ -102,7 +103,8 @@ Guidelines:
 6. Default to a static emoji. Only use motion effects when the user explicitly asks for animation or movement. Do not add motion just because the tone is playful or excited
 7. Use square mode when each line is about 2 characters or less. Otherwise use banner mode
 8. Add outline (outlineWidth > 0) for better readability on various backgrounds
-9. Use \\n for multi-line text`;
+9. Use \\n for multi-line text
+10. Mark isSensitive as true when the emoji includes sexual, violent, discriminatory, or other inappropriate content`;
 
   const response = await openai.responses.parse({
     model: config.OPENAI_MODEL,
