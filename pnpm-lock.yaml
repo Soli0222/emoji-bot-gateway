@@ -22,13 +22,13 @@ importers:
         version: 2026.1.0-beta.0
       openai:
         specifier: ^6.35.0
-        version: 6.35.0(zod@4.3.6)
+        version: 6.35.0(zod@4.4.1)
       pino:
         specifier: ^10.3.1
         version: 10.3.1
       zod:
-        specifier: ^4.3.6
-        version: 4.3.6
+        specifier: ^4.4.1
+        version: 4.4.1
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -1193,8 +1193,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  zod@4.4.1:
+    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
 
 snapshots:
 
@@ -1914,9 +1914,9 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
-  openai@6.35.0(zod@4.3.6):
+  openai@6.35.0(zod@4.4.1):
     optionalDependencies:
-      zod: 4.3.6
+      zod: 4.4.1
 
   optionator@0.9.4:
     dependencies:
@@ -2182,4 +2182,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@4.3.6: {}
+  zod@4.4.1: {}
