@@ -18,8 +18,8 @@ importers:
         specifier: ^5.10.1
         version: 5.10.1
       misskey-js:
-        specifier: 2026.1.0-beta.0
-        version: 2026.1.0-beta.0
+        specifier: 2026.5.0
+        version: 2026.5.0
       openai:
         specifier: ^6.35.0
         version: 6.35.0(zod@4.4.2)
@@ -703,8 +703,8 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
-  eventemitter3@5.0.1:
-    resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
+  eventemitter3@5.0.4:
+    resolution: {integrity: sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==}
 
   expect-type@1.3.0:
     resolution: {integrity: sha512-knvyeauYhqjOYvQ66MznSMs83wmHrCycNEN6Ao+2AeYEfxUIkuiVxdEa1qlGEPK+We3n0THiDciYSsCcgW/DoA==}
@@ -864,8 +864,8 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  misskey-js@2026.1.0-beta.0:
-    resolution: {integrity: sha512-0l+t0pgDwhgs13SxxzRnYLl+TlcCNw/0aoTi/4vg7zewf+wTjknhpmjrirHv7MFVeQWVz4V4BHKuqH0ntKrFRQ==}
+  misskey-js@2026.5.0:
+    resolution: {integrity: sha512-UXPEuxOs1J/WXeIY48nPyQCqde/odxs7zyy9+Gd304j2w+Ifv+C87J4PQzqsIaPUXfjUpt7KDpDQRJWsAsLKyQ==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -1753,7 +1753,7 @@ snapshots:
 
   esutils@2.0.3: {}
 
-  eventemitter3@5.0.1: {}
+  eventemitter3@5.0.4: {}
 
   expect-type@1.3.0: {}
 
@@ -1894,10 +1894,10 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  misskey-js@2026.1.0-beta.0:
+  misskey-js@2026.5.0:
     dependencies:
       '@simplewebauthn/types': 12.0.0
-      eventemitter3: 5.0.1
+      eventemitter3: 5.0.4
       reconnecting-websocket: 4.4.0
 
   ms@2.1.3: {}
