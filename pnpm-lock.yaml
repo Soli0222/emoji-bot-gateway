@@ -18,8 +18,8 @@ importers:
         specifier: ^5.10.1
         version: 5.10.1
       misskey-js:
-        specifier: 2026.5.0
-        version: 2026.5.0
+        specifier: 2026.5.1
+        version: 2026.5.1
       openai:
         specifier: ^6.36.0
         version: 6.36.0(zod@4.4.3)
@@ -452,9 +452,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@simplewebauthn/types@12.0.0':
-    resolution: {integrity: sha512-q6y8MkoV8V8jB4zzp18Uyj2I7oFp2/ONL8c3j8uT06AOWu3cIChc1au71QYHrP2b+xDapkGTiv+9lX7xkTlAsA==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+  '@simplewebauthn/browser@13.3.0':
+    resolution: {integrity: sha512-BE/UWv6FOToAdVk0EokzkqQQDOWtNydYlY6+OrmiZ5SCNmb41VehttboTetUM3T/fr6EAFYVXjz4My2wg230rQ==}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -864,8 +863,8 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  misskey-js@2026.5.0:
-    resolution: {integrity: sha512-UXPEuxOs1J/WXeIY48nPyQCqde/odxs7zyy9+Gd304j2w+Ifv+C87J4PQzqsIaPUXfjUpt7KDpDQRJWsAsLKyQ==}
+  misskey-js@2026.5.1:
+    resolution: {integrity: sha512-fef5OxRltMuseFrbWw2t+XEP5xhG6UVTok1cni9m3JpBlhjMgoq1Sw9i+Pi/dYrXg3OK9JFCxPqoEGh9QCBASg==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -1428,7 +1427,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.57.1':
     optional: true
 
-  '@simplewebauthn/types@12.0.0': {}
+  '@simplewebauthn/browser@13.3.0': {}
 
   '@standard-schema/spec@1.1.0': {}
 
@@ -1894,9 +1893,9 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  misskey-js@2026.5.0:
+  misskey-js@2026.5.1:
     dependencies:
-      '@simplewebauthn/types': 12.0.0
+      '@simplewebauthn/browser': 13.3.0
       eventemitter3: 5.0.4
       reconnecting-websocket: 4.4.0
 
