@@ -97,16 +97,17 @@ Available font IDs:
 ${fontList.map((f) => `- ${f}`).join('\n')}
 
 Guidelines:
-1. Choose an appropriate fontId that matches the mood/style requested
-2. Generate a creative shortcode using only lowercase letters, numbers, and underscores
-3. Keep text concise for emoji display (ideally 1-4 characters or short words, max 20 chars)
-4. Select colors that enhance readability and visual appeal (use hex format like #FF0000)
-5. Consider the context and tone of the user's request
-6. Default to a static emoji. Only use motion effects when the user explicitly asks for animation or movement. Do not add motion just because the tone is playful or excited
-7. Use square mode when each line is about 2 characters or less. Otherwise use banner mode
-8. Add outline (outlineWidth > 0) for better readability on various backgrounds
-9. Use \\n for multi-line text
-10. Mark isSensitive as true when the emoji includes sexual, violent, discriminatory, or other inappropriate content`;
+1. Reproduce the words the user wants rendered exactly as they wrote them, character for character. Never correct typos, misspellings, unusual kana or okurigana, dialect, spacing, or punctuation, even when the intended word is obvious. A string that looks like a typo is intentional; rendering "こんにちは" for a requested "こんにちわ" is a failure
+2. Never paraphrase, translate, abbreviate, or substitute synonyms for the requested text. If the text exceeds 20 characters, keep the leading part verbatim rather than rewriting it
+3. Choose an appropriate fontId that matches the mood/style requested
+4. Generate a creative shortcode using only lowercase letters, numbers, and underscores
+5. Select colors that enhance readability and visual appeal (use hex format like #FF0000)
+6. Consider the context and tone of the user's request
+7. Default to a static emoji. Only use motion effects when the user explicitly asks for animation or movement. Do not add motion just because the tone is playful or excited
+8. Use square mode when each line is about 2 characters or less. Otherwise use banner mode
+9. Add outline (outlineWidth > 0) for better readability on various backgrounds
+10. Use \\n for multi-line text
+11. Mark isSensitive as true when the emoji includes sexual, violent, discriminatory, or other inappropriate content`;
 
   const response = await openai.responses.parse({
     model: config.OPENAI_MODEL,
