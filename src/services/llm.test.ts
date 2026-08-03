@@ -351,6 +351,39 @@ describe('LLM Service', () => {
       expect(systemMessage.content).toContain('Only use motion effects when the user explicitly asks');
     });
 
+    it('should instruct the model to render the requested text verbatim', async () => {
+      const mockResult = {
+        text: 'テスト',
+        style: {
+          fontId: 'font_a',
+          textColor: '#000000',
+        },
+        shortcode: 'test',
+        isSensitive: false,
+      };
+
+      mockParse.mockResolvedValue({
+        output: [
+          {
+            type: 'message',
+            content: [{ type: 'text', text: JSON.stringify(mockResult) }],
+          },
+        ],
+        output_parsed: mockResult,
+      });
+
+      vi.resetModules();
+      const { generateEmojiParams } = await import('../services/llm.js');
+
+      await generateEmojiParams('テスト', ['Font A']);
+
+      const callArgs = mockParse.mock.calls[0][0];
+      const systemMessage = callArgs.input.find((m: { role: string }) => m.role === 'system');
+      expect(systemMessage.content).toContain('exactly as they wrote them');
+      expect(systemMessage.content).toContain('Never correct typos');
+      expect(systemMessage.content).toContain('Never paraphrase, translate, abbreviate');
+    });
+
     it('should instruct the model how to choose square vs banner mode', async () => {
       const mockResult = {
         text: 'テスト',
