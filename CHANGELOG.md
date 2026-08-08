@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.0](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.3.1...v1.4.0) (2026-08-08)
+
+
+### 新機能
+
+* publish helm chart as OCI artifact from this repo ([#176](https://github.com/Soli0222/emoji-bot-gateway/issues/176)) ([77a49aa](https://github.com/Soli0222/emoji-bot-gateway/commit/77a49aa252b369b16ece26406ae8c97185580abd))
+
+
+### バグ修正・依存関係の更新
+
+* **deps:** update docker ghcr.io/soli0222/emoji-renderer to v1.2.1 ([#172](https://github.com/Soli0222/emoji-bot-gateway/issues/172)) ([abcca11](https://github.com/Soli0222/emoji-bot-gateway/commit/abcca112f116e6fa52737f4d539b28c87bf87992))
+* ユーザーが指定したテキストを誤字修正せずそのまま描画する ([#174](https://github.com/Soli0222/emoji-bot-gateway/issues/174)) ([b83405e](https://github.com/Soli0222/emoji-bot-gateway/commit/b83405ea5a163759d3e056ea68387912fce31daa))
+
 ## [1.3.1](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.3.0...v1.3.1) (2026-07-27)
 
 
