@@ -1,0 +1,48 @@
+Emoji Bot Gateway is running.
+
+This is a long-running daemon that connects to Misskey Streaming API via WebSocket.
+It listens for mentions from local users and handles emoji generation requests.
+
+Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "emoji-bot-gateway.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "emoji-bot-gateway.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "emoji-bot-gateway.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "emoji-bot-gateway.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+  echo "Visit http://127.0.0.1:{{ .Values.service.port }}/health to check health status"
+{{- end }}
+
+Endpoints:
+  - Health Check: GET /health
+  - Metrics: GET /metrics
+
+{{- if .Values.valkey.enabled }}
+
+Valkey is enabled and running at:
+  {{ include "emoji-bot-gateway.valkey.serviceName" . }}:{{ .Values.valkey.service.port }}
+{{- else if .Values.externalValkey.host }}
+
+Using external Valkey at:
+  {{ .Values.externalValkey.host }}:{{ .Values.externalValkey.port }}
+{{- end }}
+
+Renderer service is configured at:
+  {{ .Values.config.rendererBaseUrl }}
+
+Configuration:
+  - Misskey Host: {{ .Values.config.misskeyHost }}
+  - OpenAI Model: {{ .Values.config.openaiModel }}
+  - Rate Limit: {{ .Values.config.rateLimitMaxRequests }} requests / {{ .Values.config.rateLimitWindowSeconds }} seconds
+  - State TTL: {{ .Values.config.stateTtlSeconds }} seconds
