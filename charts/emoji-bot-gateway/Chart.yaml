@@ -4,5 +4,5 @@ description: A Helm chart for Emoji Bot Gateway - Misskey Streaming API based em
 type: application
 sources:
   - https://github.com/Soli0222/emoji-bot-gateway
-version: 0.1.8
+version: 0.1.9
 appVersion: "1.4.0"
