@@ -5,6 +5,13 @@
       "release-type": "node",
       "changelog-path": "CHANGELOG.md",
       "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "yaml",
+          "path": "charts/emoji-bot-gateway/Chart.yaml",
+          "jsonpath": "$.appVersion"
+        }
+      ],
       "changelog-sections": [
         { "type": "feat", "section": "新機能" },
         { "type": "fix", "section": "バグ修正・依存関係の更新" },
