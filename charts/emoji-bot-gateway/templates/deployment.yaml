@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "emoji-bot-gateway.fullname" . }}
+  labels:
+    {{- include "emoji-bot-gateway.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "emoji-bot-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "emoji-bot-gateway.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "emoji-bot-gateway.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.config.port }}
+              protocol: TCP
+          env:
+            - name: MISSKEY_HOST
+              value: {{ .Values.config.misskeyHost | quote }}
+            - name: MISSKEY_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "emoji-bot-gateway.secretName" . }}
+                  key: misskey-token
+            - name: RENDERER_BASE_URL
+              value: {{ .Values.config.rendererBaseUrl | quote }}
+            - name: VALKEY_HOST
+              value: {{ include "emoji-bot-gateway.valkey.serviceName" . | quote }}
+            - name: VALKEY_PORT
+              value: {{ include "emoji-bot-gateway.valkey.port" . | quote }}
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "emoji-bot-gateway.secretName" . }}
+                  key: valkey-password
+                  optional: true
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "emoji-bot-gateway.secretName" . }}
+                  key: openai-api-key
+            - name: OPENAI_MODEL
+              value: {{ .Values.config.openaiModel | quote }}
+            - name: PORT
+              value: {{ .Values.config.port | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+            - name: RATE_LIMIT_MAX_REQUESTS
+              value: {{ .Values.config.rateLimitMaxRequests | quote }}
+            - name: RATE_LIMIT_WINDOW_SECONDS
+              value: {{ .Values.config.rateLimitWindowSeconds | quote }}
+            - name: STATE_TTL_SECONDS
+              value: {{ .Values.config.stateTtlSeconds | quote }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

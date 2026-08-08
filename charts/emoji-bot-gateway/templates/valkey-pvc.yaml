@@ -1,0 +1,18 @@
+{{- if and .Values.valkey.enabled .Values.valkey.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "emoji-bot-gateway.fullname" . }}-valkey
+  labels:
+    {{- include "emoji-bot-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+spec:
+  accessModes:
+    - {{ .Values.valkey.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.valkey.persistence.size }}
+  {{- if .Values.valkey.persistence.storageClass }}
+  storageClassName: {{ .Values.valkey.persistence.storageClass }}
+  {{- end }}
+{{- end }}

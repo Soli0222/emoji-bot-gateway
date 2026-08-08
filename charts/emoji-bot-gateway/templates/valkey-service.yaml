@@ -1,0 +1,19 @@
+{{- if .Values.valkey.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "emoji-bot-gateway.fullname" . }}-valkey
+  labels:
+    {{- include "emoji-bot-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.valkey.service.port }}
+      targetPort: valkey
+      protocol: TCP
+      name: valkey
+  selector:
+    {{- include "emoji-bot-gateway.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: valkey
+{{- end }}
