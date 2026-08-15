@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.4.0...v1.5.0) (2026-08-09)
+
+
+### 新機能
+
+* **ci:** rebuild the release pipeline as a DAG on shared workflows ([#178](https://github.com/Soli0222/emoji-bot-gateway/issues/178)) ([c2b49d7](https://github.com/Soli0222/emoji-bot-gateway/commit/c2b49d76b9a5a67e645645e0679d4c9204179eec))
+
 ## [1.4.0](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.3.1...v1.4.0) (2026-08-08)
 
 
