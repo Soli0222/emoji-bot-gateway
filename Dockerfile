@@ -2,12 +2,12 @@
 FROM node:25.9.0-alpine3.23 AS builder
 
 # Install pnpm
-RUN npm install -g pnpm@10
+RUN npm install -g pnpm@12.13.0
 
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -23,7 +23,7 @@ RUN pnpm run build
 FROM node:25.9.0-alpine3.23 AS runner
 
 # Install pnpm
-RUN npm install -g pnpm@10
+RUN npm install -g pnpm@12.13.0
 
 WORKDIR /app
 
@@ -32,7 +32,7 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 botuser
 
 # Copy package files and install production dependencies only
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod && pnpm store prune
 
 # Copy built files
