@@ -18,8 +18,8 @@ importers:
         specifier: ^5.10.1
         version: 5.10.1
       misskey-js:
-        specifier: 2026.5.1
-        version: 2026.5.1
+        specifier: 2026.10.0
+        version: 2026.10.0
       openai:
         specifier: ^6.37.0
         version: 6.37.0(zod@4.4.3)
@@ -863,8 +863,8 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  misskey-js@2026.5.1:
-    resolution: {integrity: sha512-fef5OxRltMuseFrbWw2t+XEP5xhG6UVTok1cni9m3JpBlhjMgoq1Sw9i+Pi/dYrXg3OK9JFCxPqoEGh9QCBASg==}
+  misskey-js@2026.10.0:
+    resolution: {integrity: sha512-PDGUAEEI+/VimiCFqU+/7Ya31g+u0NhxvUhSePuQD7RYJUbxY2jUZl+NE6Ibx0gJWzVdmX2ccvbcG0CJ8HXpSg==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -1893,7 +1893,7 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  misskey-js@2026.5.1:
+  misskey-js@2026.10.0:
     dependencies:
       '@simplewebauthn/browser': 13.3.0
       eventemitter3: 5.0.4
