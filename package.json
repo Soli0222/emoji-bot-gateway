@@ -19,7 +19,7 @@
   "dependencies": {
     "@hono/node-server": "^2.1.5",
     "hono": "^4.13.13",
-    "ioredis": "^5.11.1",
+    "ioredis": "^6.0.0",
     "misskey-js": "2026.10.0",
     "openai": "^7.32.0",
     "pino": "^10.4.0",
