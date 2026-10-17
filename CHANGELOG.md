@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.2](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.1...v1.5.2) (2026-10-17)
+
+
+### バグ修正・依存関係の更新
+
+* **deps:** update docker ghcr.io/soli0222/emoji-renderer to v1.4.9 ([#217](https://github.com/Soli0222/emoji-bot-gateway/issues/217)) ([16ed5a8](https://github.com/Soli0222/emoji-bot-gateway/commit/16ed5a81f6b546eeff6e3113f4623855bf26718b))
+* **deps:** update node openai to ^7.33.0 ([#219](https://github.com/Soli0222/emoji-bot-gateway/issues/219)) ([4117a0e](https://github.com/Soli0222/emoji-bot-gateway/commit/4117a0e39da8d3cc6e1cae07487fc19047aac903))
+
 ## [1.5.1](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.0...v1.5.1) (2026-10-16)
 
 
