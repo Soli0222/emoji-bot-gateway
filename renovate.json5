@@ -156,6 +156,10 @@
         "node"
       ],
       "groupName": "Node.js",
+      "prPriority": 10,
+      "prConcurrentLimit": 0,
+      "branchConcurrentLimit": 0,
+      "prHourlyLimit": 0,
       "minimumReleaseAge": "0 days",
       "minimumReleaseAgeBehaviour": "timestamp-optional"
     },
