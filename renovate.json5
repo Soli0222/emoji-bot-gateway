@@ -33,17 +33,6 @@
     {
       customType: 'regex',
       managerFilePatterns: [
-        '/^.github/workflows/.*.yml$/',
-      ],
-      matchStrings: [
-        'node-version:\\s*[\'"]?(?<currentValue>[^\'"\\s]+)[\'"]?',
-      ],
-      depNameTemplate: 'node',
-      datasourceTemplate: 'docker',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
         '/^charts/.+/values\\.yaml$/',
       ],
       matchStrings: [
@@ -147,6 +136,38 @@
       addLabels: [
         'major-update',
       ],
+    },
+    {
+      "description": "Track the latest stable Node.js release, including new majors before LTS.",
+      "matchPackageNames": [
+        "node",
+        "@types/node"
+      ],
+      "versioning": "npm",
+      "enabled": true,
+      "ignoreUnstable": true,
+      "separateMajorMinor": false,
+      "automerge": true,
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "Do not delay runtime security updates; keep npm package cooldowns.",
+      "matchPackageNames": [
+        "node"
+      ],
+      "groupName": "Node.js",
+      "minimumReleaseAge": "0 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
+      "description": "Separate the Docker variant from the stable Node.js version.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "node"
+      ],
+      "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$"
     },
   ],
 }

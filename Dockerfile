@@ -1,13 +1,11 @@
 # Build stage
-FROM node:25.9.0-alpine3.23 AS builder
-
-# Install pnpm
-RUN npm install -g pnpm@12.13.0
+FROM node:26.12.0-alpine AS builder
 
 WORKDIR /app
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN npm install --global "$(node -p 'require("./package.json").packageManager')"
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -20,10 +18,7 @@ COPY src ./src
 RUN pnpm run build
 
 # Production stage
-FROM node:25.9.0-alpine3.23 AS runner
-
-# Install pnpm
-RUN npm install -g pnpm@12.13.0
+FROM node:26.12.0-alpine AS runner
 
 WORKDIR /app
 
@@ -33,6 +28,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 # Copy package files and install production dependencies only
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN npm install --global "$(node -p 'require("./package.json").packageManager')"
 RUN pnpm install --frozen-lockfile --prod && pnpm store prune
 
 # Copy built files
