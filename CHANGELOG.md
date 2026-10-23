@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.4](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.3...v1.5.4) (2026-10-23)
+
+
+### バグ修正・依存関係の更新
+
+* **deps:** update node typescript-eslint to ^8.72.0 ([#235](https://github.com/Soli0222/emoji-bot-gateway/issues/235)) ([104436a](https://github.com/Soli0222/emoji-bot-gateway/commit/104436a1f310f5f51524ceadae2d3f373c31d6da))
+
 ## [1.5.3](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.2...v1.5.3) (2026-10-22)
 
 
