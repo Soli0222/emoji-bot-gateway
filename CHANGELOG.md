@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.4](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.3...v1.5.4) (2026-10-24)
+
+
+### バグ修正・依存関係の更新
+
+* **deps:** update node openai to ^7.41.0 ([#237](https://github.com/Soli0222/emoji-bot-gateway/issues/237)) ([387ae97](https://github.com/Soli0222/emoji-bot-gateway/commit/387ae974795e24feea474684e004385d3cd7f599))
+* **deps:** update node pnpm to v12.15.0 ([#238](https://github.com/Soli0222/emoji-bot-gateway/issues/238)) ([88fe1b0](https://github.com/Soli0222/emoji-bot-gateway/commit/88fe1b0fd7be114043501ee90747579309f71582))
+* **deps:** update node typescript-eslint to ^8.72.0 ([#235](https://github.com/Soli0222/emoji-bot-gateway/issues/235)) ([104436a](https://github.com/Soli0222/emoji-bot-gateway/commit/104436a1f310f5f51524ceadae2d3f373c31d6da))
+
 ## [1.5.3](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.2...v1.5.3) (2026-10-22)
 
 
