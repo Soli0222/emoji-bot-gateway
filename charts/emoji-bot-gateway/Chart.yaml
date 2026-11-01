@@ -1,9 +1,10 @@
 apiVersion: v2
 name: emoji-bot-gateway
 description: >-
-  A Helm chart for Emoji Bot Gateway - Misskey Streaming API based emoji generation bot
+  A Helm chart for Emoji Bot Gateway - Misskey Streaming API based emoji
+  generation bot
 type: application
 sources:
   - https://github.com/Soli0222/emoji-bot-gateway
 version: 0.2.5
-appVersion: 1.5.4
+appVersion: 1.5.5
