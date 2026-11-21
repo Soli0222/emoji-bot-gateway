@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.5.8](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.7...v1.5.8) (2026-11-21)
+
+
+### バグ修正・依存関係の更新
+
+* **deps:** update docker ghcr.io/soli0222/emoji-renderer to v1.4.14 ([#281](https://github.com/Soli0222/emoji-bot-gateway/issues/281)) ([b268681](https://github.com/Soli0222/emoji-bot-gateway/commit/b26868166139fe230d0d255f17173f84457eef37))
+* **deps:** update node @hono/node-server to ^2.1.8 ([#283](https://github.com/Soli0222/emoji-bot-gateway/issues/283)) ([34a245c](https://github.com/Soli0222/emoji-bot-gateway/commit/34a245c2e2ff8cce492c6eb05a99d732fe75e1e3))
+* **deps:** update node @hono/node-server to ^2.1.9 ([#291](https://github.com/Soli0222/emoji-bot-gateway/issues/291)) ([e9b368f](https://github.com/Soli0222/emoji-bot-gateway/commit/e9b368f2efc7ceff734f6a4459369190172c72e5))
+* **deps:** update node eslint to ^10.15.0 ([#287](https://github.com/Soli0222/emoji-bot-gateway/issues/287)) ([6bb1218](https://github.com/Soli0222/emoji-bot-gateway/commit/6bb12182a7afd33561c4d2422df39ef3fab71614))
+* **deps:** update node hono to ^4.13.19 ([#289](https://github.com/Soli0222/emoji-bot-gateway/issues/289)) ([3c9a64c](https://github.com/Soli0222/emoji-bot-gateway/commit/3c9a64cfcaf609c14889b6f0eb24169c9b20589c))
+* **deps:** update node misskey-js to v2026.11.0 ([#282](https://github.com/Soli0222/emoji-bot-gateway/issues/282)) ([bbd4dae](https://github.com/Soli0222/emoji-bot-gateway/commit/bbd4daee551f5e23a7648ab17247b5811b612b20))
+* **deps:** update node openai to ^7.57.0 ([#285](https://github.com/Soli0222/emoji-bot-gateway/issues/285)) ([5356076](https://github.com/Soli0222/emoji-bot-gateway/commit/535607617765396f342a7acd396b7d2980837242))
+* **deps:** update node openai to ^7.59.0 ([#292](https://github.com/Soli0222/emoji-bot-gateway/issues/292)) ([a67e21c](https://github.com/Soli0222/emoji-bot-gateway/commit/a67e21ccd8b5bef4946ff4e0d4e1be94a733f435))
+* **deps:** update node pnpm to v12.21.0 ([#280](https://github.com/Soli0222/emoji-bot-gateway/issues/280)) ([858c1e3](https://github.com/Soli0222/emoji-bot-gateway/commit/858c1e3f296500eb3d8f015c43d74e3611fb827a))
+* **deps:** update node typescript-eslint to ^8.73.0 ([#290](https://github.com/Soli0222/emoji-bot-gateway/issues/290)) ([928bfbc](https://github.com/Soli0222/emoji-bot-gateway/commit/928bfbcf117e63f0a92cd65a308467d7e529e7ad))
+* **deps:** update vitest monorepo to ^5.1.1 ([#293](https://github.com/Soli0222/emoji-bot-gateway/issues/293)) ([962385f](https://github.com/Soli0222/emoji-bot-gateway/commit/962385f26915af37cfcc0a0664b1e218546d3ccc))
+
 ## [1.5.7](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.6...v1.5.7) (2026-11-15)
 
 
