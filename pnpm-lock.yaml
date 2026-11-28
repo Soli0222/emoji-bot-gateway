@@ -187,10 +187,10 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^2.1.11
-        version: 2.1.11(hono@4.13.21)
+        version: 2.1.11(hono@4.13.23)
       hono:
-        specifier: ^4.13.21
-        version: 4.13.21
+        specifier: ^4.13.22
+        version: 4.13.23
       ioredis:
         specifier: ^6.1.0
         version: 6.1.0
@@ -919,8 +919,8 @@ packages:
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
-  hono@4.13.21:
-    resolution: {integrity: sha512-h9UsguqfVk4kjUwLvQpHOmOaJpW10jz9lp8bvKUUa04wJG/fabKFBqXZ06D6LFaeKQZtUZRVeg0gfkTTEsX7Mw==}
+  hono@4.13.23:
+    resolution: {integrity: sha512-OS90dj7dcsftEEWCOef8jRbnHE5lbrOq0hNRqjSyPsOnaGZvvfof1KS05hQNb4kUOCfDq1mG3PmHoX37DMnHQg==}
     engines: {node: '>=16.9.0'}
 
   hookified@1.15.1:
@@ -1546,9 +1546,9 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@hono/node-server@2.1.11(hono@4.13.21)':
+  '@hono/node-server@2.1.11(hono@4.13.23)':
     dependencies:
-      hono: 4.13.21
+      hono: 4.13.23
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -1993,7 +1993,7 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono@4.13.21: {}
+  hono@4.13.23: {}
 
   hookified@1.15.1: {}
 
