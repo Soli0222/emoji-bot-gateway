@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.5.9](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.8...v1.5.9) (2026-11-28)
+
+
+### バグ修正・依存関係の更新
+
+* **deps:** update docker ghcr.io/soli0222/emoji-renderer to v1.4.15 ([#297](https://github.com/Soli0222/emoji-bot-gateway/issues/297)) ([25a4bea](https://github.com/Soli0222/emoji-bot-gateway/commit/25a4bea6b05a715e9c313ca4b294bc03557a15ae))
+* **deps:** update node @hono/node-server to ^2.1.11 ([#302](https://github.com/Soli0222/emoji-bot-gateway/issues/302)) ([0e0ecd3](https://github.com/Soli0222/emoji-bot-gateway/commit/0e0ecd31a5208123b0a85d66f0545b55420ce956))
+* **deps:** update node @types/node to ^26.6.7 ([#312](https://github.com/Soli0222/emoji-bot-gateway/issues/312)) ([49be081](https://github.com/Soli0222/emoji-bot-gateway/commit/49be081bb71fe180a9dcf65f4a15828d1a08d1df))
+* **deps:** update node hono to ^4.13.20 ([#305](https://github.com/Soli0222/emoji-bot-gateway/issues/305)) ([eae5e71](https://github.com/Soli0222/emoji-bot-gateway/commit/eae5e71244aa790a583b87b1107b4dcc6b21ef05))
+* **deps:** update node hono to ^4.13.21 ([#306](https://github.com/Soli0222/emoji-bot-gateway/issues/306)) ([05a216e](https://github.com/Soli0222/emoji-bot-gateway/commit/05a216eb3629b7ec6fb719e0e609a6ece3c795f4))
+* **deps:** update node ioredis to ^6.1.0 ([#307](https://github.com/Soli0222/emoji-bot-gateway/issues/307)) ([0b01905](https://github.com/Soli0222/emoji-bot-gateway/commit/0b01905c40e3d068224b34eef6b52df6bdc7f8b1))
+* **deps:** update node openai to ^7.62.0 ([#300](https://github.com/Soli0222/emoji-bot-gateway/issues/300)) ([060563f](https://github.com/Soli0222/emoji-bot-gateway/commit/060563fe2df55004f9666d3a32584d639f54d687))
+* **deps:** update node pnpm to v12.23.0 ([#303](https://github.com/Soli0222/emoji-bot-gateway/issues/303)) ([026add5](https://github.com/Soli0222/emoji-bot-gateway/commit/026add57261bdb18f1c0a3b45a96464b03d20b71))
+* **deps:** update node typescript-eslint to ^8.74.0 ([#309](https://github.com/Soli0222/emoji-bot-gateway/issues/309)) ([ac20aff](https://github.com/Soli0222/emoji-bot-gateway/commit/ac20aff920fa7621ddfb3f87ece4aff1b901d0eb))
+
 ## [1.5.8](https://github.com/Soli0222/emoji-bot-gateway/compare/v1.5.7...v1.5.8) (2026-11-22)
 
 
